@@ -6,15 +6,19 @@ const log = (title, message) => {
 };
 
 const handlers = {
-  'HelloIntent': function() {
-    this.emit(':tell', 'Hello World!');
-  },
   'OpenIntent': function() {
-    log('printing', this.event);
-    this.emit(':tell', 'Hello ' + this.event.request.intent.slots.deviceName.value);
+    const parameters = this.event.request.intent.slots;
+    const deviceName = parameters.deviceName.value;
+    const pin = parameters.pin.value;
+    log('opening', this.event);
+    this.emit(':tell', 'Opening ' + deviceName + ' ' + pin);
   },
   'CloseIntent': function() {
-    this.emit(':tell', 'Hello World!');
+    const parameters = this.event.request.intent.slots;
+    const deviceName = parameters.deviceName.value;
+    const pin = parameters.pin.value;
+    log('closing', this.event);
+    this.emit(':tell', 'Closing ' + deviceName + ' ' + pin);
   }
 };
 
