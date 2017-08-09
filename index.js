@@ -8,17 +8,37 @@ const log = (title, message) => {
 const handlers = {
   'OpenIntent': function() {
     const parameters = this.event.request.intent.slots;
-    const deviceName = parameters.deviceName.value;
+    const doorName = parameters.doorName.value;
     const pin = parameters.pin.value;
-    log('opening', this.event);
-    this.emit(':tell', 'Opening ' + deviceName + ' ' + pin);
+    this.emit(':tell', 'Opening ' + doorName + ' ' + pin);
   },
   'CloseIntent': function() {
     const parameters = this.event.request.intent.slots;
-    const deviceName = parameters.deviceName.value;
+    const doorName = parameters.doorName.value;
     const pin = parameters.pin.value;
-    log('closing', this.event);
-    this.emit(':tell', 'Closing ' + deviceName + ' ' + pin);
+    this.emit(':tell', 'Closing ' + doorName + ' ' + pin);
+  },
+  'TurnOnIntent': function() {
+    const parameters = this.event.request.intent.slots;
+    const lightName = parameters.lightName.value;
+    this.emit(':tell', 'Turning on ' + lightName);
+  },
+  'TurnOffIntent': function() {
+    const parameters = this.event.request.intent.slots;
+    const lightName = parameters.lightName.value;
+    this.emit(':tell', 'Turning off ' + lightName);
+  },
+  'ListDevicesIntent': function() {
+    this.emit(':tell', 'Listing devices');
+  },
+  'ListDoorsIntent': function() {
+    this.emit(':tell', 'Listing doors');
+  },
+  'ListLightsIntent': function() {
+    this.emit(':tell', 'Listing lights');
+  },
+  'DiscoverDevicesIntent': function() {
+    this.emit(':tell', 'Discovering devices');
   }
 };
 
