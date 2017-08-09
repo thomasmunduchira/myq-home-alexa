@@ -1,0 +1,24 @@
+{
+  "name": "myq-alexa",
+  "version": "1.0.0",
+  "description": "An Alexa custom skill to control your MyQ devices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomasmunduchira/myq-home-alexa.git"
+  },
+  "author": "Thomas Munduchira",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thomasmunduchira/myq-home-alexa/issues"
+  },
+  "homepage": "https://github.com/thomasmunduchira/myq-home-alexa#readme",
+  "dependencies": {
+    "alexa-sdk": "^1.0.11",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4"
+  }
+}
