@@ -73,17 +73,28 @@ const listLights = (lights) => {
 };
 
 const handlers = {
+  'LaunchRequest': function() {
+    const devices = this.attributes.devices;
+    const hasDevices = devices && devices.length > 0;
+    let speech = 'Welcome to MyQ Home. ';
+    if (hasDevices) {
+      speech += 'Ask about or change the state of a device.';
+    } else {
+      speech += 'Ask me to discover your devices, after which you can ask about or change the state of a device.'
+    }
+    this.emit(':ask', speech, speech);
+  },
   'NotLinked': function() {
     log('NotLinked', this.event);
-    this.emit(':askWithLinkAccountCard', 'Please go to your Alexa app and link your account');
+    this.emit(':tellWithLinkAccountCard', 'Please go to your Alexa app and link your account');
   },
   'IncorrectCredentials': function() {
     log('IncorrectCredentials', this.event);
-    this.emit(':askWithLinkAccountCard', 'Your credentials have expired. Please go to your Alexa app and link your account again');
+    this.emit(':tellWithLinkAccountCard', 'Your credentials have expired. Please go to your Alexa app and link your account again');
   },
   'NoDiscoveredDevices': function() {
     log('NoDiscoveredDevices', this.event);
-    this.emit(':tell', 'Please discover devices first and try again');
+    this.emit(':ask', 'Please discover devices first and try again');
   },
   'DoorOpenIntent': function() {
     log('DoorOpenIntent', this.event);
@@ -95,7 +106,7 @@ const handlers = {
     const doorName = parameters.doorName.value;
     const pin = parameters.pin.value;
     if (!pin) {
-      this.emit(':tell', 'You did not provide a pin.');
+      this.emit(':ask', 'You did not provide a pin.');
     }
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
@@ -231,7 +242,8 @@ const handlers = {
   },
   'AMAZON.HelpIntent': function() {
     log('AMAZON.HelpIntent', this.event);
-    this.emit(':ask', 'You can tell me to discover your devices, after which you can ask about and change the state of a device');
+    const speech = 'You can ask me to discover your devices, after which you can ask about or change the state of a device.';
+    this.emit(':ask', speech);
   },
   'AMAZON.StopIntent': function() {
     log('AMAZON.StopIntent', this.event);
@@ -243,7 +255,6 @@ const handlers = {
   },
   'SessionEndedRequest':function() {
     log('SessionEndedRequest', this.event);
-    this.attributes.endedSessionCount += 1;
     this.emit(':saveState', true);
     this.emit(':tell', 'Goodbye!');
   },
