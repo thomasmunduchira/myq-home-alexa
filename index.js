@@ -6,27 +6,37 @@ const log = (title, message) => {
 };
 
 const handlers = {
-  'OpenIntent': function() {
+  'DoorOpenIntent': function() {
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     const pin = parameters.pin.value;
     this.emit(':tell', 'Opening ' + doorName + ' ' + pin);
   },
-  'CloseIntent': function() {
+  'DoorCloseIntent': function() {
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     const pin = parameters.pin.value;
     this.emit(':tell', 'Closing ' + doorName + ' ' + pin);
   },
-  'TurnOnIntent': function() {
+  'LightOnIntent': function() {
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     this.emit(':tell', 'Turning on ' + lightName);
   },
-  'TurnOffIntent': function() {
+  'LightOffIntent': function() {
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     this.emit(':tell', 'Turning off ' + lightName);
+  },
+  'DoorQueryIntent': function() {
+    const parameters = this.event.request.intent.slots;
+    const doorName = parameters.doorName.value;
+    this.emit(':tell', 'Querying door');
+  },
+  'LightQueryIntent': function() {
+    const parameters = this.event.request.intent.slots;
+    const lightName = parameters.lightName.value;
+    this.emit(':tell', 'Querying light');
   },
   'ListDevicesIntent': function() {
     this.emit(':tell', 'Listing devices');
@@ -45,6 +55,7 @@ const handlers = {
 exports.handler = (event, context, callback) => {
   const alexa = Alexa.handler(event, context);
   alexa.appId = config.appId;
+  alexa.dynamoDBTableName = config.db.name;
   alexa.registerHandlers(handlers);
   alexa.execute();
 };
