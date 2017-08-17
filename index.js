@@ -161,6 +161,22 @@ const discoverDevices = (accessToken) => {
   });
 };
 
+const resetPin = (accessToken) => {
+  return request({
+    method: 'POST',
+    uri: `${config.endpoint}/resetPin`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    json: true
+  }).then((result) => {
+    log('resetPin result', result);
+    return result;
+  }).catch((err) => {
+    log('resetPin - Error', err);
+  });
+};
+
 const handlers = {
   'emit': function(parameters) {
     const { type, message1, message2 } = parameters;
@@ -222,6 +238,13 @@ const handlers = {
       message1: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account'
     });
   },
+  'PinReset': function() {
+    log('PinReset', this.event);
+    return this.emit('emit', {
+      type: ':tell',
+      message1: 'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account'
+    });
+  },
   'NoDiscoveredDevices': function(type) {
     log('NoDiscoveredDevices', this.event);
     return this.emit('emit', {
@@ -250,7 +273,8 @@ const handlers = {
       message1: 'The MyQ service is currently down. Please wait for a bit and try again.'
     });
   },
-  'ErrorHandler': function(result) {
+  'ErrorHandler': function(parameters) {
+    const { accessToken, result } = parameters;
     if (result.returnCode === 14) {
       return this.emit('IncorrectCredentials');
     } else if (result.returnCode === 20) {
@@ -258,7 +282,19 @@ const handlers = {
     } else if (result.returnCode === 21) {
       return this.emit('NoPinProvided');
     } else if (result.returnCode === 22) {
+      this.attributes.pinAttempts++;
+      if (this.attributes.pinAttempts >= 3) {
+        resetPin(accessToken)
+          .then((result) => {
+            log('pinReset', result);
+          }).catch((err) => {
+            log('pinReset - Error', err);
+          });
+        return this.emit('PinReset');
+      }
       return this.emit('IncorrectPin');
+    } else if (result.returnCode === 23) {
+      return this.emit('PinReset');
     }
 
     return this.emit('MyQServiceDown');
@@ -291,8 +327,12 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
+        this.attributes.pinAttempts = 0;
         return this.emit('emit', {
           type: ':tell',
           message1: `Opening ${door.name}`
@@ -324,7 +364,10 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         return this.emit('emit', {
           type: ':tell',
@@ -357,7 +400,10 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         return this.emit('emit', {
           type: ':tell',
@@ -390,7 +436,10 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         return this.emit('emit', {
           type: ':tell',
@@ -422,7 +471,10 @@ const handlers = {
     return getState(accessToken, door)
       .then((result) => {
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         return this.emit('emit', {
           type: ':tell',
@@ -454,7 +506,10 @@ const handlers = {
     return getState(accessToken, light)
       .then((result) => {
         if (result.returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         return this.emit('emit', {
           type: ':tell',
@@ -507,7 +562,10 @@ const handlers = {
       .then((result) => {
         const { returnCode, devices, error } = result;
         if (returnCode !== 0) {
-          return this.emit('ErrorHandler', result);
+          return this.emit('ErrorHandler', {
+            accessToken,
+            result
+          });
         }
         let index = 1;
         if (returnCode === 0) {
