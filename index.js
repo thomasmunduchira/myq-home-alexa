@@ -70,20 +70,20 @@ const describeDevices = (devices, singularName, pluralName) => {
   return description;
 };
 
-const describeDevicesCard = (devices, singularName, pluralName) => {
+const describeDevicesCard = (devices) => {
   let description = "";
   if (devices.length === 0) {
-    return description;
-  } else if (devices.length === 1) {
-    description += `Your ${singularName} is called ${devices[0].name}.`;
+    description += 'You do not have devices!';
     return description;
   }
-  description += `Your ${pluralName} are called ${devices[0].name}`;
-  for (let i = 1; i < devices.length; i++) {
+
+  for (let i = 0; i < devices.length; i++) {
     const device = devices[i];
-    description += `, ${device.name}`
+    if (i !== 0) {
+      description += '\n'; 
+    }
+    description += `${device.name}: ${device.typeName}`;
   }
-  description += '.';
   return description;
 }
 
@@ -96,35 +96,14 @@ const listDevices = (devices) => {
   return description;
 };
 
-const listDevicesCard = (devices) => {
-  const doors = getDoors(devices);
-  const descriptionDoors = describeDevicesCard(doors, 'door', 'doors');
-  const lights = getLights(devices);
-  const descriptionLights = describeDevicesCard(lights, 'light', 'lights');
-  const description = `You have ${devices.length} ${devices.length === 1 ? 'device' : 'devices'}, ${doors.length} ${doors.length === 1 ? 'door' : 'doors'} and ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionDoors} ${descriptionLights}`;
-  return description;
-};
-
 const listDoors = (doors) => {
   const descriptionDoors = describeDevices(doors, 'door', 'doors');
   const description = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
   return description;
 };
 
-const listDoorsCard = (doors) => {
-  const descriptionDoors = describeDevicesCard(doors, 'door', 'doors');
-  const description = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
-  return description;
-};
-
 const listLights = (lights) => {
   const descriptionLights = describeDevices(lights, 'light', 'lights');
-  const description = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
-  return description;
-};
-
-const listLightsCard = (lights) => {
-  const descriptionLights = describeDevicesCard(lights, 'light', 'lights');
   const description = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
   return description;
 };
@@ -217,13 +196,17 @@ const resetPin = (accessToken) => {
 
 const handlers = {
   'emit': function(parameters) {
-    const { type, message1, message2 } = parameters;
-    if (message2) {
-      log(`Emitting ${type}: ${message1}, ${message2}`, {});
-      return this.emit(`${type}`, message1, message2);
+    const { type, speechOutput, repromptSpeech, cardTitle, cardContent, imageObj } = parameters;
+    log(`Response ${type}`, parameters);
+    if (['tell', 'tellWithLinkAccountCard', 'askWithLinkAccountCard'].includes(type)) {
+      return this.emit(`:${type}`, speechOutput);
+    } else if (['ask'].includes(type)) {
+      return this.emit(`:${type}`, speechOutput, repromptSpeech);
+    } else if (['tellWithCard'].includes(type)) {
+      return this.emit(`:${type}`, speechOutput, cardTitle, cardContent, imageObj);
+    } else if (['askWithCard'].includes(type)) {
+      return this.emit(`:${type}`, speechOutput, repromptSpeech, cardTitle, cardContent, imageObj);
     }
-    log(`Emitting ${type}: ${message1}`, {});
-    return this.emit(`${type}`, message1);
   },
   'LaunchRequest': function() {
     log('LaunchRequest', this.event);
@@ -236,86 +219,86 @@ const handlers = {
       speech += 'Ask me to discover your devices, after which you can ask about or change the state of a device.';
     }
     return this.emit('emit', {
-      type: ':ask',
-      message1: speech,
-      message2: speech
+      type: 'ask',
+      speechOutput: speech,
+      repromptSpeech: speech
     });
   },
   'NotLinked': function() {
     log('NotLinked', this.event);
     return this.emit('emit', {
-      type: ':tellWithLinkAccountCard',
-      message1: 'Your MyQ account is not linked. Please go to your Alexa app and link your account'
+      type: 'tellWithLinkAccountCard',
+      speechOutput: 'Your MyQ account is not linked. Please go to your Alexa app and link your account'
     });
   },
   'IncorrectCredentials': function() {
     log('IncorrectCredentials', this.event);
     return this.emit('emit', {
-      type: ':tellWithLinkAccountCard',
-      message1: 'Your MyQ account credentials have changed. Please go to your Alexa app and link your account again'
+      type: 'tellWithLinkAccountCard',
+      speechOutput: 'Your MyQ account credentials have changed. Please go to your Alexa app and link your account again'
     });
   },
   'NoPinEstablished': function() {
     log('NoPinEstablished', this.event);
     return this.emit('emit', {
-      type: ':tellWithLinkAccountCard',
-      message1: 'You do not have a pin established. Please go to your Alexa app and relink your MyQ account with a pin'
+      type: 'tellWithLinkAccountCard',
+      speechOutput: 'You do not have a pin established. Please go to your Alexa app and relink your MyQ account with a pin'
     });
   },
   'NoPinProvided': function() {
     log('NoPinProvided', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: 'You did not provide a pin'
+      type: 'ask',
+      speechOutput: 'You did not provide a pin'
     });
   },
   'FirstIncorrectPin': function() {
     log('FirstIncorrectPin', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: 'You have provided an incorrect pin.'
+      type: 'ask',
+      speechOutput: 'You have provided an incorrect pin.'
     });
   },
   'SecondIncorrectPin': function() {
     log('SecondIncorrectPin', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account'
+      type: 'ask',
+      speechOutput: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account'
     });
   },
   'PinReset': function() {
     log('PinReset', this.event);
     return this.emit('emit', {
-      type: ':tell',
-      message1: 'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account'
+      type: 'tell',
+      speechOutput: 'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account'
     });
   },
   'NoDiscoveredDevices': function(type) {
     log('NoDiscoveredDevices', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: `You do not have any ${type} discovered. Ask me to discover devices and try again`
+      type: 'ask',
+      speechOutput: `You do not have any ${type} discovered. Ask me to discover devices and try again`
     });
   },
   'NoDeviceNameProvided': function() {
     log('NoDeviceNameProvided', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: 'You did not provide a device name'
+      type: 'ask',
+      speechOutput: 'You did not provide a device name'
     });
   },
   'IncorrectDeviceName': function() {
     log('IncorrectDeviceName', this.event);
     return this.emit('emit', {
-      type: ':ask',
-      message1: 'A device by that name was not found'
+      type: 'ask',
+      speechOutput: 'A device by that name was not found'
     });
   },
   'MyQServiceDown': function() {
     log('MyQServiceDown', this.event);
     return this.emit('emit', {
-      type: ':tell',
-      message1: 'The MyQ service is currently down. Please wait for a bit and try again.'
+      type: 'tell',
+      speechOutput: 'The MyQ service is currently down. Please wait for a bit and try again.'
     });
   },
   'ErrorHandler': function(parameters) {
@@ -384,8 +367,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: `Opening ${door.name}`
+          type: 'ask',
+          speechOutput: `Opening ${door.name}`
         });
       }).catch((err) => {
         log('DoorOpenIntent - Error', err);
@@ -420,8 +403,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: `Closing ${door.name}`
+          type: 'ask',
+          speechOutput: `Closing ${door.name}`
         });
       }).catch((err) => {
         log('DoorCloseIntent - Error', err);
@@ -456,8 +439,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: 'Okay'
+          type: 'ask',
+          speechOutput: 'Okay'
         });
       }).catch((err) => {
         log('LightOnIntent - Error', err);
@@ -492,8 +475,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: 'Okay'
+          type: 'ask',
+          speechOutput: 'Okay'
         });
       }).catch((err) => {
         log('LightOffIntent - Error', err);
@@ -527,8 +510,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: `${door.name} is ${result.doorStateDescription}`
+          type: 'ask',
+          speechOutput: `${door.name} is ${result.doorStateDescription}`
         });
       }).catch((err) => {
         log('DoorQueryIntent - Error', err);
@@ -562,8 +545,8 @@ const handlers = {
           });
         }
         return this.emit('emit', {
-          type: ':tell',
-          message1: `${light.name} is ${result.lightStateDescription}`
+          type: 'ask',
+          speechOutput: `${light.name} is ${result.lightStateDescription}`
         });
       }).catch((err) => {
         log('LightQueryIntent - Error', err);
@@ -576,8 +559,10 @@ const handlers = {
       return this.emit('NoDiscoveredDevices', 'devices');
     }
     return this.emit('emit', {
-      type: ':tell',
-      message1: listDevices(devices)
+      type: 'askWithCard',
+      speechOutput: listDevices(devices),
+      cardTitle: 'Your Devices',
+      cardContent: describeDevicesCard(devices)
     });
   },
   'ListDoorsIntent': function() {
@@ -587,8 +572,10 @@ const handlers = {
       return this.emit('NoDiscoveredDevices', 'doors');
     }
     return this.emit('emit', {
-      type: ':tell',
-      message1: listDoors(doors)
+      type: 'askWithCard',
+      speechOutput: listDoors(doors),
+      cardTitle: 'Your Doors',
+      cardContent: describeDevicesCard(doors)
     });
   },
   'ListLightsIntent': function() {
@@ -598,8 +585,10 @@ const handlers = {
       return this.emit('NoDiscoveredDevices', 'lights');
     }
     return this.emit('emit', {
-      type: ':tell',
-      message1: listLights(lights)
+      type: 'askWithCard',
+      speechOutput: listLights(lights),
+      cardTitle: 'Your Lights',
+      cardContent: describeDevicesCard(lights)
     });
   },
   'DiscoverDevicesIntent': function() {
@@ -630,8 +619,10 @@ const handlers = {
           }
           this.attributes.devices = devices;
           return this.emit('emit', {
-            type: ':tell',
-            message1: `Discovery is complete. ${listDevices(devices)}`
+            type: 'askWithCard',
+            speechOutput: `Discovery is complete. ${listDevices(devices)}`,
+            cardTitle: 'Discovered Devices',
+            cardContent: describeDevicesCard(devices)
           });
         }
       }).catch((err) => {
@@ -642,8 +633,8 @@ const handlers = {
     log('AMAZON.HelpIntent', this.event);
     const speech = 'You can ask me to discover your devices, after which you can ask about or change the state of a device.';
     return this.emit('emit', {
-      type: ':ask',
-      message1: speech
+      type: 'ask',
+      speechOutput: speech
     });
   },
   'AMAZON.StopIntent': function() {
@@ -658,15 +649,15 @@ const handlers = {
     log('SessionEndedRequest', this.event);
     this.emit(':saveState', true);
     return this.emit('emit', {
-      type: ':tell',
-      message1: 'Goodbye!'
+      type: 'tell',
+      speechOutput: 'Goodbye!'
     });
   },
   'Unhandled': function() {
     log('Unhandled', this.event);
     this.emit('emit', {
-      type: ':tell',
-      message1: 'Sorry, I was unable to understand your request. Please try again.'
+      type: 'ask',
+      speechOutput: 'Sorry, I was unable to understand your request. Please try again.'
     });
     return this.emit('SessionEndedRequest');
   }
