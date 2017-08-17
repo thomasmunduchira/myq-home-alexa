@@ -54,41 +54,79 @@ const getLights = (devices) => {
 };
 
 const describeDevices = (devices, singularName, pluralName) => {
-  let speech = "";
+  let description = "";
   if (devices.length === 0) {
-    return speech;
+    return description;
   } else if (devices.length === 1) {
-    speech += `Your ${singularName} is called ${devices[0].name}.`;
-    return speech;
+    description += `Your ${singularName} is called ${devices[0].name}.`;
+    return description;
   }
-  speech += `Your ${pluralName} are called ${devices[0].name}`;
+  description += `Your ${pluralName} are called ${devices[0].name}`;
   for (let i = 1; i < devices.length; i++) {
     const device = devices[i];
-    speech += `, ${device.name}`
+    description += `, ${device.name}`
   }
-  speech += '.';
-  return speech;
+  description += '.';
+  return description;
 };
+
+const describeDevicesCard = (devices, singularName, pluralName) => {
+  let description = "";
+  if (devices.length === 0) {
+    return description;
+  } else if (devices.length === 1) {
+    description += `Your ${singularName} is called ${devices[0].name}.`;
+    return description;
+  }
+  description += `Your ${pluralName} are called ${devices[0].name}`;
+  for (let i = 1; i < devices.length; i++) {
+    const device = devices[i];
+    description += `, ${device.name}`
+  }
+  description += '.';
+  return description;
+}
 
 const listDevices = (devices) => {
   const doors = getDoors(devices);
   const descriptionDoors = describeDevices(doors, 'door', 'doors');
   const lights = getLights(devices);
   const descriptionLights = describeDevices(lights, 'light', 'lights');
-  const speech = `You have ${devices.length} ${devices.length === 1 ? 'device' : 'devices'}, ${doors.length} ${doors.length === 1 ? 'door' : 'doors'} and ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionDoors} ${descriptionLights}`;
-  return speech;
+  const description = `You have ${devices.length} ${devices.length === 1 ? 'device' : 'devices'}, ${doors.length} ${doors.length === 1 ? 'door' : 'doors'} and ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionDoors} ${descriptionLights}`;
+  return description;
+};
+
+const listDevicesCard = (devices) => {
+  const doors = getDoors(devices);
+  const descriptionDoors = describeDevicesCard(doors, 'door', 'doors');
+  const lights = getLights(devices);
+  const descriptionLights = describeDevicesCard(lights, 'light', 'lights');
+  const description = `You have ${devices.length} ${devices.length === 1 ? 'device' : 'devices'}, ${doors.length} ${doors.length === 1 ? 'door' : 'doors'} and ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionDoors} ${descriptionLights}`;
+  return description;
 };
 
 const listDoors = (doors) => {
   const descriptionDoors = describeDevices(doors, 'door', 'doors');
-  const speech = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
-  return speech;
+  const description = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
+  return description;
+};
+
+const listDoorsCard = (doors) => {
+  const descriptionDoors = describeDevicesCard(doors, 'door', 'doors');
+  const description = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
+  return description;
 };
 
 const listLights = (lights) => {
   const descriptionLights = describeDevices(lights, 'light', 'lights');
-  const speech = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
-  return speech;
+  const description = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
+  return description;
+};
+
+const listLightsCard = (lights) => {
+  const descriptionLights = describeDevicesCard(lights, 'light', 'lights');
+  const description = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
+  return description;
 };
 
 const getState = (accessToken, device) => {
@@ -231,8 +269,15 @@ const handlers = {
       message1: 'You did not provide a pin'
     });
   },
-  'IncorrectPin': function() {
-    log('IncorrectPin', this.event);
+  'FirstIncorrectPin': function() {
+    log('FirstIncorrectPin', this.event);
+    return this.emit('emit', {
+      type: ':ask',
+      message1: 'You have provided an incorrect pin.'
+    });
+  },
+  'SecondIncorrectPin': function() {
+    log('SecondIncorrectPin', this.event);
     return this.emit('emit', {
       type: ':ask',
       message1: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account'
@@ -282,17 +327,23 @@ const handlers = {
     } else if (result.returnCode === 21) {
       return this.emit('NoPinProvided');
     } else if (result.returnCode === 22) {
-      this.attributes.pinAttempts++;
-      if (this.attributes.pinAttempts >= 3) {
-        resetPin(accessToken)
+      let pinAttempts = this.attributes.pinAttempts;
+      pinAttempts = pinAttempts ? pinAttempts + 1 : 1;
+      this.attributes.pinAttempts = pinAttempts;
+      if (pinAttempts === 1) {
+        return this.emit('FirstIncorrectPin');
+      } else if (pinAttempts === 2) {
+        return this.emit('SecondIncorrectPin');
+      } else {
+        return resetPin(accessToken)
           .then((result) => {
             log('pinReset', result);
+            this.attributes.pinAttempts = 0;
+            return this.emit('PinReset');
           }).catch((err) => {
             log('pinReset - Error', err);
           });
-        return this.emit('PinReset');
       }
-      return this.emit('IncorrectPin');
     } else if (result.returnCode === 23) {
       return this.emit('PinReset');
     }
@@ -305,6 +356,10 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const doors = getDoors(this.attributes.devices);
+    if (!doors || doors.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'doors');
+    }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
@@ -315,10 +370,6 @@ const handlers = {
       return this.emit('NoPinProvided');
     }
     pin = parseFloat(pin);
-    const doors = getDoors(this.attributes.devices);
-    if (!doors || doors.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'doors');
-    }
     const door = getClosestDevice(doorName, doors);
     if (!door) {
       return this.emit('IncorrectDeviceName');
@@ -332,7 +383,6 @@ const handlers = {
             result
           });
         }
-        this.attributes.pinAttempts = 0;
         return this.emit('emit', {
           type: ':tell',
           message1: `Opening ${door.name}`
@@ -347,14 +397,14 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const doors = getDoors(this.attributes.devices);
+    if (!doors || doors.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'doors');
+    }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
       return this.emit('NoDeviceNameProvided');
-    }
-    const doors = getDoors(this.attributes.devices);
-    if (!doors || doors.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'doors');
     }
     const door = getClosestDevice(doorName, doors);
     if (!door) {
@@ -383,14 +433,14 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const lights = getLights(this.attributes.devices);
+    if (!lights || lights.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'lights');
+    }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
       return this.emit('NoDeviceNameProvided');
-    }
-    const lights = getLights(this.attributes.devices);
-    if (!lights || lights.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'lights');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
@@ -419,14 +469,14 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const lights = getLights(this.attributes.devices);
+    if (!lights || lights.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'lights');
+    }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
       return this.emit('NoDeviceNameProvided');
-    }
-    const lights = getLights(this.attributes.devices);
-    if (!lights || lights.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'lights');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
@@ -455,14 +505,14 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const doors = getDoors(this.attributes.devices);
+    if (!doors || doors.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'doors');
+    }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
       return this.emit('NoDeviceNameProvided');
-    }
-    const doors = getDoors(this.attributes.devices);
-    if (!doors || doors.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'doors');
     }
     const door = getClosestDevice(doorName, doors);
     if (!door) {
@@ -490,14 +540,14 @@ const handlers = {
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+    const lights = getLights(this.attributes.devices);
+    if (!lights || lights.length === 0) {
+      return this.emit('NoDiscoveredDevices', 'lights');
+    }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
       return this.emit('NoDeviceNameProvided');
-    }
-    const lights = getLights(this.attributes.devices);
-    if (!lights || lights.length === 0) {
-      return this.emit('NoDiscoveredDevices', 'lights');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
