@@ -11,11 +11,13 @@ const log = (title, message) => {
 const getClosestDevice = (name, devices) => {
   let minimumDistance = Number.MAX_VALUE;
   let closestDevice = null;
-  name = name.replace(/\s/g, '').toLowerCase();
-  for (let i = 0; i < devices.length; i++) {
+  const cleanName = name.replace(/\s/g, '')
+    .toLowerCase();
+  for (let i = 0; i < devices.length; i += 1) {
     const device = devices[i];
-    const deviceName = device.name.replace(/\s/g, '').toLowerCase();
-    const distance = levenshtein.get(name, deviceName);
+    const cleanDeviceName = device.name.replace(/\s/g, '')
+      .toLowerCase();
+    const distance = levenshtein.get(cleanName, cleanDeviceName);
     if (distance < minimumDistance) {
       minimumDistance = distance;
       closestDevice = device;
@@ -23,14 +25,14 @@ const getClosestDevice = (name, devices) => {
   }
   console.log(name, minimumDistance, closestDevice.name, devices);
   return closestDevice;
-}
+};
 
 const getDoors = (devices) => {
   if (!devices) {
     return false;
   }
   const doors = [];
-  for (let i = 0; i < devices.length; i++) {
+  for (let i = 0; i < devices.length; i += 1) {
     const device = devices[i];
     if (device.typeId !== 3) {
       doors.push(device);
@@ -44,7 +46,7 @@ const getLights = (devices) => {
     return false;
   }
   const lights = [];
-  for (let i = 0; i < devices.length; i++) {
+  for (let i = 0; i < devices.length; i += 1) {
     const device = devices[i];
     if (device.typeId === 3) {
       lights.push(device);
@@ -54,7 +56,7 @@ const getLights = (devices) => {
 };
 
 const describeDevices = (devices, singularName, pluralName) => {
-  let description = "";
+  let description = '';
   if (devices.length === 0) {
     return description;
   } else if (devices.length === 1) {
@@ -62,30 +64,30 @@ const describeDevices = (devices, singularName, pluralName) => {
     return description;
   }
   description += `Your ${pluralName} are called ${devices[0].name}`;
-  for (let i = 1; i < devices.length; i++) {
+  for (let i = 1; i < devices.length; i += 1) {
     const device = devices[i];
-    description += `, ${device.name}`
+    description += `, ${device.name}`;
   }
   description += '.';
   return description;
 };
 
 const describeDevicesCard = (devices) => {
-  let description = "";
+  let description = '';
   if (devices.length === 0) {
     description += 'You do not have devices!';
     return description;
   }
 
-  for (let i = 0; i < devices.length; i++) {
+  for (let i = 0; i < devices.length; i += 1) {
     const device = devices[i];
     if (i !== 0) {
-      description += '\n'; 
+      description += '\n';
     }
     description += `${device.name}: ${device.typeName}`;
   }
   return description;
-}
+};
 
 const listDevices = (devices) => {
   const doors = getDoors(devices);
@@ -116,22 +118,25 @@ const getState = (accessToken, device) => {
     type = 'door';
   }
 
-  return request({
+  const requestOptions = {
     method: 'GET',
     uri: `${config.endpoint}/${type}/state`,
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
     qs: {
-      id: device.id
+      id: device.id,
     },
-    json: true
-  }).then((result) => {
-    log('getState result', result);
-    return result;
-  }).catch((err) => {
-    log('getState - Error', err);
-  });
+    json: true,
+  };
+  return request(requestOptions)
+    .then((result) => {
+      log('getState result', result);
+      return result;
+    })
+    .catch((err) => {
+      log('getState - Error', err);
+    });
 };
 
 const setState = (accessToken, device, state, pin) => {
@@ -142,73 +147,89 @@ const setState = (accessToken, device, state, pin) => {
     type = 'door';
   }
 
-  return request({
+  const requestOptions = {
     method: 'PUT',
     uri: `${config.endpoint}/${type}/state`,
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
     body: {
       id: device.id,
       state,
-      pin
+      pin,
     },
-    json: true
-  }).then((result) => {
-    log('setState result', result);
-    return result;
-  }).catch((err) => {
-    log('setState - Error', err);
-  });
+    json: true,
+  };
+  return request(requestOptions)
+    .then((result) => {
+      log('setState result', result);
+      return result;
+    })
+    .catch((err) => {
+      log('setState - Error', err);
+    });
 };
 
 const discoverDevices = (accessToken) => {
-  return request({
+  const requestOptions = {
     method: 'GET',
     uri: `${config.endpoint}/devices`,
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
-    json: true
-  }).then((result) => {
-    log('discoverDevices result', result);
-    return result;
-  }).catch((err) => {
-    log('discoverDevices - Error', err);
-  });
+    json: true,
+  };
+  return request(requestOptions)
+    .then((result) => {
+      log('discoverDevices result', result);
+      return result;
+    })
+    .catch((err) => {
+      log('discoverDevices - Error', err);
+    });
 };
 
 const resetPin = (accessToken) => {
-  return request({
+  const requestOptions = {
     method: 'POST',
     uri: `${config.endpoint}/resetPin`,
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
-    json: true
-  }).then((result) => {
-    log('resetPin result', result);
-    return result;
-  }).catch((err) => {
-    log('resetPin - Error', err);
-  });
+    json: true,
+  };
+  return request(requestOptions)
+    .then((result) => {
+      log('resetPin result', result);
+      return result;
+    })
+    .catch((err) => {
+      log('resetPin - Error', err);
+    });
 };
 
 const handlers = {
-  'emit': function(parameters) {
-    const { type, speechOutput, repromptSpeech, cardTitle, cardContent, imageObj } = parameters;
+  emit(parameters) {
+    const {
+      type,
+      speechOutput,
+      repromptSpeech,
+      cardTitle,
+      cardContent,
+      imageObj,
+    } = parameters;
     log(`Response ${type}`, parameters);
-    if (['tell', 'tellWithLinkAccountCard', 'askWithLinkAccountCard'].includes(type)) {
-      return this.emit(`:${type}`, speechOutput);
-    } else if (['ask'].includes(type)) {
+    if (['ask'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, repromptSpeech);
     } else if (['tellWithCard'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, cardTitle, cardContent, imageObj);
     } else if (['askWithCard'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, repromptSpeech, cardTitle, cardContent, imageObj);
     }
+
+    return this.emit(`:${type}`, speechOutput);
   },
-  'LaunchRequest': function() {
+  LaunchRequest() {
     log('LaunchRequest', this.event);
     const devices = this.attributes.devices;
     const hasDevices = devices && devices.length > 0;
@@ -221,88 +242,91 @@ const handlers = {
     return this.emit('emit', {
       type: 'ask',
       speechOutput: speech,
-      repromptSpeech: speech
+      repromptSpeech: speech,
     });
   },
-  'NotLinked': function() {
+  NotLinked() {
     log('NotLinked', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
-      speechOutput: 'Your MyQ account is not linked. Please go to your Alexa app and link your account'
+      speechOutput: 'Your MyQ account is not linked. Please go to your Alexa app and link your account',
     });
   },
-  'IncorrectCredentials': function() {
+  IncorrectCredentials() {
     log('IncorrectCredentials', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
-      speechOutput: 'Your MyQ account credentials have changed. Please go to your Alexa app and link your account again'
+      speechOutput: 'Your MyQ account credentials have changed. Please go to your Alexa app and link your account again',
     });
   },
-  'NoPinEstablished': function() {
+  NoPinEstablished() {
     log('NoPinEstablished', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
-      speechOutput: 'You do not have a pin established. Please go to your Alexa app and relink your MyQ account with a pin'
+      speechOutput: 'You do not have a pin established. Please go to your Alexa app and relink your MyQ account with a pin',
     });
   },
-  'NoPinProvided': function() {
+  NoPinProvided() {
     log('NoPinProvided', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: 'You did not provide a pin'
+      speechOutput: 'You did not provide a pin',
     });
   },
-  'FirstIncorrectPin': function() {
+  FirstIncorrectPin() {
     log('FirstIncorrectPin', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: 'You have provided an incorrect pin.'
+      speechOutput: 'You have provided an incorrect pin.',
     });
   },
-  'SecondIncorrectPin': function() {
+  SecondIncorrectPin() {
     log('SecondIncorrectPin', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account'
+      speechOutput: 'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account',
     });
   },
-  'PinReset': function() {
+  PinReset() {
     log('PinReset', this.event);
     return this.emit('emit', {
       type: 'tell',
-      speechOutput: 'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account'
+      speechOutput: 'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account',
     });
   },
-  'NoDiscoveredDevices': function(type) {
+  NoDiscoveredDevices(type) {
     log('NoDiscoveredDevices', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: `You do not have any ${type} discovered. Ask me to discover devices and try again`
+      speechOutput: `You do not have any ${type} discovered. Ask me to discover devices and try again`,
     });
   },
-  'NoDeviceNameProvided': function() {
+  NoDeviceNameProvided() {
     log('NoDeviceNameProvided', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: 'You did not provide a device name'
+      speechOutput: 'You did not provide a device name',
     });
   },
-  'IncorrectDeviceName': function() {
+  IncorrectDeviceName() {
     log('IncorrectDeviceName', this.event);
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: 'A device by that name was not found'
+      speechOutput: 'A device by that name was not found. Try again',
     });
   },
-  'MyQServiceDown': function() {
+  MyQServiceDown() {
     log('MyQServiceDown', this.event);
     return this.emit('emit', {
       type: 'tell',
-      speechOutput: 'The MyQ service is currently down. Please wait for a bit and try again.'
+      speechOutput: 'The MyQ service is currently down. Please wait for a bit and try again.',
     });
   },
-  'ErrorHandler': function(parameters) {
-    const { accessToken, result } = parameters;
+  ErrorHandler(parameters) {
+    const {
+      accessToken,
+      result,
+    } = parameters;
     if (result.returnCode === 14) {
       return this.emit('IncorrectCredentials');
     } else if (result.returnCode === 20) {
@@ -317,23 +341,24 @@ const handlers = {
         return this.emit('FirstIncorrectPin');
       } else if (pinAttempts === 2) {
         return this.emit('SecondIncorrectPin');
-      } else {
-        return resetPin(accessToken)
-          .then((result) => {
-            log('pinReset', result);
-            this.attributes.pinAttempts = 0;
-            return this.emit('PinReset');
-          }).catch((err) => {
-            log('pinReset - Error', err);
-          });
       }
+
+      return resetPin(accessToken)
+        .then((output) => {
+          log('pinReset', output);
+          this.attributes.pinAttempts = 0;
+          return this.emit('PinReset');
+        })
+        .catch((err) => {
+          log('pinReset - Error', err);
+        });
     } else if (result.returnCode === 23) {
       return this.emit('PinReset');
     }
 
     return this.emit('MyQServiceDown');
   },
-  'DoorOpenIntent': function() {
+  DoorOpenIntent() {
     log('DoorOpenIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -357,24 +382,31 @@ const handlers = {
     if (!door) {
       return this.emit('IncorrectDeviceName');
     }
+
     return setState(accessToken, door, 1, pin)
       .then((result) => {
         log('setStateResult', result);
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: `Opening ${door.name}`
+          type: 'tell',
+          speechOutput: `Opening ${door.name}`,
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('DoorOpenIntent - Error', err);
       });
   },
-  'DoorCloseIntent': function() {
+  DoorCloseIntent() {
     log('DoorCloseIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -393,24 +425,31 @@ const handlers = {
     if (!door) {
       return this.emit('IncorrectDeviceName');
     }
+
     return setState(accessToken, door, 0)
       .then((result) => {
         log('setStateResult', result);
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: `Closing ${door.name}`
+          type: 'tell',
+          speechOutput: `Closing ${door.name}`,
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('DoorCloseIntent - Error', err);
       });
   },
-  'LightOnIntent': function() {
+  LightOnIntent() {
     log('LightOnIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -429,24 +468,31 @@ const handlers = {
     if (!light) {
       return this.emit('IncorrectDeviceName');
     }
+
     return setState(accessToken, light, 1)
       .then((result) => {
         log('setStateResult', result);
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: 'Okay'
+          type: 'tell',
+          speechOutput: 'Okay',
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('LightOnIntent - Error', err);
       });
   },
-  'LightOffIntent': function() {
+  LightOffIntent() {
     log('LightOffIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -465,24 +511,31 @@ const handlers = {
     if (!light) {
       return this.emit('IncorrectDeviceName');
     }
+
     return setState(accessToken, light, 0)
       .then((result) => {
         log('setStateResult', result);
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: 'Okay'
+          type: 'tell',
+          speechOutput: 'Okay',
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('LightOffIntent - Error', err);
       });
   },
-  'DoorQueryIntent': function() {
+  DoorQueryIntent() {
     log('DoorQueryIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -501,23 +554,30 @@ const handlers = {
     if (!door) {
       return this.emit('IncorrectDeviceName');
     }
+
     return getState(accessToken, door)
       .then((result) => {
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: `${door.name} is ${result.doorStateDescription}`
+          type: 'tell',
+          speechOutput: `${door.name} is ${result.doorStateDescription}`,
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('DoorQueryIntent - Error', err);
       });
   },
-  'LightQueryIntent': function() {
+  LightQueryIntent() {
     log('LightQueryIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
@@ -536,135 +596,150 @@ const handlers = {
     if (!light) {
       return this.emit('IncorrectDeviceName');
     }
+
     return getState(accessToken, light)
       .then((result) => {
-        if (result.returnCode !== 0) {
+        const {
+          returnCode,
+        } = result;
+
+        if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         return this.emit('emit', {
-          type: 'ask',
-          speechOutput: `${light.name} is ${result.lightStateDescription}`
+          type: 'tell',
+          speechOutput: `${light.name} is ${result.lightStateDescription}`,
         });
-      }).catch((err) => {
+      })
+      .catch((err) => {
         log('LightQueryIntent - Error', err);
       });
   },
-  'ListDevicesIntent': function() {
+  ListDevicesIntent() {
     log('ListDevicesIntent', this.event);
     const devices = this.attributes.devices;
     if (!devices || devices.length === 0) {
       return this.emit('NoDiscoveredDevices', 'devices');
     }
+
     return this.emit('emit', {
-      type: 'askWithCard',
+      type: 'tellWithCard',
       speechOutput: listDevices(devices),
       cardTitle: 'Your Devices',
-      cardContent: describeDevicesCard(devices)
+      cardContent: describeDevicesCard(devices),
     });
   },
-  'ListDoorsIntent': function() {
+  ListDoorsIntent() {
     log('ListDoorsIntent', this.event);
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
       return this.emit('NoDiscoveredDevices', 'doors');
     }
+
     return this.emit('emit', {
-      type: 'askWithCard',
+      type: 'tellWithCard',
       speechOutput: listDoors(doors),
       cardTitle: 'Your Doors',
-      cardContent: describeDevicesCard(doors)
+      cardContent: describeDevicesCard(doors),
     });
   },
-  'ListLightsIntent': function() {
+  ListLightsIntent() {
     log('ListLightsIntent', this.event);
     const lights = getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
       return this.emit('NoDiscoveredDevices', 'lights');
     }
+
     return this.emit('emit', {
-      type: 'askWithCard',
+      type: 'tellWithCard',
       speechOutput: listLights(lights),
       cardTitle: 'Your Lights',
-      cardContent: describeDevicesCard(lights)
+      cardContent: describeDevicesCard(lights),
     });
   },
-  'DiscoverDevicesIntent': function() {
+  DiscoverDevicesIntent() {
     log('DiscoverDevicesIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
       return this.emit('NotLinked');
     }
+
     return discoverDevices(accessToken)
       .then((result) => {
-        const { returnCode, devices, error } = result;
+        const {
+          returnCode,
+          devices,
+        } = result;
+
         if (returnCode !== 0) {
           return this.emit('ErrorHandler', {
             accessToken,
-            result
+            result,
           });
         }
+
         let index = 1;
-        if (returnCode === 0) {
-          for (let i = devices.length - 1; i >= 0; i--) {
-            const device = devices[i];
-            if (!device.id) {
-              devices.splice(i, 1);
-            } else if (!device.name) {
-              device.name = `Device ${index}`;
-              index++;
-            }
+        for (let i = devices.length - 1; i >= 0; i -= 1) {
+          const device = devices[i];
+          if (!device.id) {
+            devices.splice(i, 1);
+          } else if (!device.name) {
+            device.name = `Device ${index}`;
+            index += 1;
           }
-          this.attributes.devices = devices;
-          return this.emit('emit', {
-            type: 'askWithCard',
-            speechOutput: `Discovery is complete. ${listDevices(devices)}`,
-            cardTitle: 'Discovered Devices',
-            cardContent: describeDevicesCard(devices)
-          });
         }
-      }).catch((err) => {
+        this.attributes.devices = devices;
+        return this.emit('emit', {
+          type: 'tellWithCard',
+          speechOutput: `Discovery is complete. ${listDevices(devices)}`,
+          cardTitle: 'Discovered Devices',
+          cardContent: describeDevicesCard(devices),
+        });
+      })
+      .catch((err) => {
         log('DiscoverDevicesIntent - Error', err);
       });
   },
-  'AMAZON.HelpIntent': function() {
+  'AMAZON.HelpIntent': function helpIntent() {
     log('AMAZON.HelpIntent', this.event);
     const speech = 'You can ask me to discover your devices, after which you can ask about or change the state of a device.';
     return this.emit('emit', {
       type: 'ask',
-      speechOutput: speech
+      speechOutput: speech,
     });
   },
-  'AMAZON.StopIntent': function() {
+  'AMAZON.StopIntent': function stopIntent() {
     log('AMAZON.StopIntent', this.event);
     return this.emit('SessionEndedRequest');
   },
-  'AMAZON.CancelIntent': function() {
+  'AMAZON.CancelIntent': function cancelIntent() {
     log('AMAZON.CancelIntent', this.event);
     return this.emit('SessionEndedRequest');
   },
-  'SessionEndedRequest':function() {
+  SessionEndedRequest() {
     log('SessionEndedRequest', this.event);
     this.emit(':saveState', true);
     return this.emit('emit', {
       type: 'tell',
-      speechOutput: 'Goodbye!'
+      speechOutput: 'Goodbye!',
     });
   },
-  'Unhandled': function() {
+  Unhandled() {
     log('Unhandled', this.event);
     this.emit('emit', {
       type: 'ask',
-      speechOutput: 'Sorry, I was unable to understand your request. Please try again.'
+      speechOutput: 'Sorry, I was unable to understand your request. Please try again.',
     });
     return this.emit('SessionEndedRequest');
-  }
+  },
 };
 
 exports.handler = (event, context, callback) => {
-  const alexa = Alexa.handler(event, context);
+  const alexa = Alexa.handler(event, context, callback);
   alexa.appId = config.appId;
   alexa.dynamoDBTableName = config.db.name;
   alexa.registerHandlers(handlers);

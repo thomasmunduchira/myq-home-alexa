@@ -1,9 +1,9 @@
 const config = {
   appId: 'APP_ID',
   db: {
-    name: 'DB_NAME'
+    name: 'DB_NAME',
   },
-  endpoint: 'https://myq.thomasmunduchira.com'
+  endpoint: 'https://myq.thomasmunduchira.com',
 };
 
 module.exports = config;
