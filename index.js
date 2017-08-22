@@ -128,6 +128,7 @@ const getState = (accessToken, device) => {
       id: device.id,
     },
     json: true,
+    timeout: config.requestTimeout,
   };
   return request(requestOptions)
     .then((result) => {
@@ -136,6 +137,7 @@ const getState = (accessToken, device) => {
     })
     .catch((err) => {
       log('getState - Error', err);
+      return null;
     });
 };
 
@@ -159,6 +161,7 @@ const setState = (accessToken, device, state, pin) => {
       pin,
     },
     json: true,
+    timeout: config.requestTimeout,
   };
   return request(requestOptions)
     .then((result) => {
@@ -167,6 +170,7 @@ const setState = (accessToken, device, state, pin) => {
     })
     .catch((err) => {
       log('setState - Error', err);
+      return null;
     });
 };
 
@@ -178,6 +182,7 @@ const discoverDevices = (accessToken) => {
       Authorization: `Bearer ${accessToken}`,
     },
     json: true,
+    timeout: config.requestTimeout,
   };
   return request(requestOptions)
     .then((result) => {
@@ -186,6 +191,7 @@ const discoverDevices = (accessToken) => {
     })
     .catch((err) => {
       log('discoverDevices - Error', err);
+      return null;
     });
 };
 
@@ -197,6 +203,7 @@ const resetPin = (accessToken) => {
       Authorization: `Bearer ${accessToken}`,
     },
     json: true,
+    timeout: config.requestTimeout,
   };
   return request(requestOptions)
     .then((result) => {
@@ -205,6 +212,7 @@ const resetPin = (accessToken) => {
     })
     .catch((err) => {
       log('resetPin - Error', err);
+      return null;
     });
 };
 
@@ -327,13 +335,17 @@ const handlers = {
       accessToken,
       result,
     } = parameters;
-    if (result.returnCode === 14) {
+    const {
+      returnCode,
+    } = result;
+
+    if ([14, 16, 17].includes(returnCode)) {
       return this.emit('IncorrectCredentials');
-    } else if (result.returnCode === 20) {
+    } else if ([20].includes(returnCode)) {
       return this.emit('NoPinEstablished');
-    } else if (result.returnCode === 21) {
+    } else if ([21].includes(returnCode)) {
       return this.emit('NoPinProvided');
-    } else if (result.returnCode === 22) {
+    } else if ([22].includes(returnCode)) {
       let pinAttempts = this.attributes.pinAttempts;
       pinAttempts = pinAttempts ? pinAttempts + 1 : 1;
       this.attributes.pinAttempts = pinAttempts;
@@ -346,13 +358,17 @@ const handlers = {
       return resetPin(accessToken)
         .then((output) => {
           log('pinReset', output);
+          if (!output || !output.success) {
+            return this.emit('MyQServiceDown');
+          }
+
           this.attributes.pinAttempts = 0;
           return this.emit('PinReset');
         })
         .catch((err) => {
           log('pinReset - Error', err);
         });
-    } else if (result.returnCode === 23) {
+    } else if ([23].includes(returnCode)) {
       return this.emit('PinReset');
     }
 
@@ -386,6 +402,10 @@ const handlers = {
     return setState(accessToken, door, 1, pin)
       .then((result) => {
         log('setStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -429,6 +449,10 @@ const handlers = {
     return setState(accessToken, door, 0)
       .then((result) => {
         log('setStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -472,6 +496,10 @@ const handlers = {
     return setState(accessToken, light, 1)
       .then((result) => {
         log('setStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -515,6 +543,10 @@ const handlers = {
     return setState(accessToken, light, 0)
       .then((result) => {
         log('setStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -557,6 +589,11 @@ const handlers = {
 
     return getState(accessToken, door)
       .then((result) => {
+        log('getStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -599,6 +636,11 @@ const handlers = {
 
     return getState(accessToken, light)
       .then((result) => {
+        log('getStateResult', result);
+        if (!result) {
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
         } = result;
@@ -670,6 +712,12 @@ const handlers = {
 
     return discoverDevices(accessToken)
       .then((result) => {
+        log('discoverDevicesResult', result);
+        if (!result) {
+          this.attributes.devices = [];
+          return this.emit('MyQServiceDown');
+        }
+
         const {
           returnCode,
           devices,
