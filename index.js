@@ -5,20 +5,23 @@ const levenshtein = require('fast-levenshtein');
 const config = require('./config');
 
 const log = (title, message) => {
+  // title: string, message: object
   console.log(`**** ${title}:`, JSON.stringify(message));
 };
 
 const getClosestDevice = (name, devices) => {
+  // finds closest device by comparing device names to name provided. Uses https://en.wikipedia.org/wiki/Levenshtein_distance
   let minimumDistance = Number.MAX_VALUE;
   let closestDevice = null;
   const cleanName = name.replace(/\s/g, '')
-    .toLowerCase();
+    .toLowerCase(); // standardize format of name
   for (let i = 0; i < devices.length; i += 1) {
     const device = devices[i];
     const cleanDeviceName = device.name.replace(/\s/g, '')
-      .toLowerCase();
+      .toLowerCase(); // standardize format of device name
     const distance = levenshtein.get(cleanName, cleanDeviceName);
     if (distance < minimumDistance) {
+      // make this device the closestDevice if it has the shortest distance
       minimumDistance = distance;
       closestDevice = device;
     }
@@ -28,6 +31,7 @@ const getClosestDevice = (name, devices) => {
 };
 
 const getDoors = (devices) => {
+  // finds all doors in a list of devices
   if (!devices) {
     return false;
   }
@@ -42,6 +46,7 @@ const getDoors = (devices) => {
 };
 
 const getLights = (devices) => {
+  // finds all lights in a list of devices
   if (!devices) {
     return false;
   }
@@ -56,6 +61,7 @@ const getLights = (devices) => {
 };
 
 const describeDevices = (devices, singularName, pluralName) => {
+  // generates a description of devices
   let description = '';
   if (devices.length === 0) {
     return description;
@@ -73,6 +79,7 @@ const describeDevices = (devices, singularName, pluralName) => {
 };
 
 const describeDevicesCard = (devices) => {
+  // generates a description of devices for Alexa card responses
   let description = '';
   if (devices.length === 0) {
     description += 'You do not have devices!';
@@ -90,6 +97,7 @@ const describeDevicesCard = (devices) => {
 };
 
 const listDevices = (devices) => {
+  // generates a description of devices
   const doors = getDoors(devices);
   const descriptionDoors = describeDevices(doors, 'door', 'doors');
   const lights = getLights(devices);
@@ -99,18 +107,23 @@ const listDevices = (devices) => {
 };
 
 const listDoors = (doors) => {
+  // generates a description of doors
   const descriptionDoors = describeDevices(doors, 'door', 'doors');
   const description = `You have ${doors.length} ${doors.length === 1 ? 'door' : 'doors'}. ${descriptionDoors}`;
   return description;
 };
 
 const listLights = (lights) => {
+  // generates a description of lights
   const descriptionLights = describeDevices(lights, 'light', 'lights');
   const description = `You have ${lights.length} ${lights.length === 1 ? 'light' : 'lights'}. ${descriptionLights}`;
   return description;
 };
 
 const getState = (accessToken, device) => {
+  // gets the state of a device
+
+  // find type of device
   let type;
   if (device.typeId === 3) {
     type = 'light';
@@ -142,6 +155,9 @@ const getState = (accessToken, device) => {
 };
 
 const setState = (accessToken, device, state, pin) => {
+  // sets the state of a device
+
+  // find type of device
   let type;
   if (device.typeId === 3) {
     type = 'light';
@@ -175,6 +191,7 @@ const setState = (accessToken, device, state, pin) => {
 };
 
 const discoverDevices = (accessToken) => {
+  // discovers all garages and lights on a user's account
   const requestOptions = {
     method: 'GET',
     uri: `${config.endpoint}/devices`,
@@ -196,6 +213,7 @@ const discoverDevices = (accessToken) => {
 };
 
 const resetPin = (accessToken) => {
+  // resets a user's pin
   const requestOptions = {
     method: 'POST',
     uri: `${config.endpoint}/resetPin`,
@@ -218,6 +236,7 @@ const resetPin = (accessToken) => {
 
 const handlers = {
   emit(parameters) {
+    // handles all responses to user requests
     const {
       type,
       speechOutput,
@@ -238,6 +257,7 @@ const handlers = {
     return this.emit(`:${type}`, speechOutput);
   },
   LaunchRequest() {
+    // user enters skill
     log('LaunchRequest', this.event);
     const devices = this.attributes.devices;
     const hasDevices = devices && devices.length > 0;
@@ -254,6 +274,7 @@ const handlers = {
     });
   },
   NotLinked() {
+    // user has not linked their MyQ account
     log('NotLinked', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
@@ -261,6 +282,7 @@ const handlers = {
     });
   },
   IncorrectCredentials() {
+    // user has changed MyQ credentials
     log('IncorrectCredentials', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
@@ -268,6 +290,7 @@ const handlers = {
     });
   },
   NoPinEstablished() {
+    // user does not have a pin established
     log('NoPinEstablished', this.event);
     return this.emit('emit', {
       type: 'tellWithLinkAccountCard',
@@ -275,6 +298,7 @@ const handlers = {
     });
   },
   NoPinProvided() {
+    // user did not provide a pin
     log('NoPinProvided', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -282,6 +306,7 @@ const handlers = {
     });
   },
   FirstIncorrectPin() {
+    // user provided an incorrect pin
     log('FirstIncorrectPin', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -289,6 +314,7 @@ const handlers = {
     });
   },
   SecondIncorrectPin() {
+    // user provided the second consecutive incorrect pin
     log('SecondIncorrectPin', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -296,6 +322,7 @@ const handlers = {
     });
   },
   PinReset() {
+    // user provided the third consecutive incorrect pin
     log('PinReset', this.event);
     return this.emit('emit', {
       type: 'tell',
@@ -303,6 +330,7 @@ const handlers = {
     });
   },
   NoDiscoveredDevices(type) {
+    // user does not have any devices of this type
     log('NoDiscoveredDevices', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -310,6 +338,7 @@ const handlers = {
     });
   },
   NoDeviceNameProvided() {
+    // user did not provide a device name
     log('NoDeviceNameProvided', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -317,6 +346,7 @@ const handlers = {
     });
   },
   IncorrectDeviceName() {
+    // user did not provide a valid device name
     log('IncorrectDeviceName', this.event);
     return this.emit('emit', {
       type: 'ask',
@@ -324,6 +354,7 @@ const handlers = {
     });
   },
   MyQServiceDown() {
+    // MyQ service is down
     log('MyQServiceDown', this.event);
     return this.emit('emit', {
       type: 'tell',
@@ -331,6 +362,7 @@ const handlers = {
     });
   },
   ErrorHandler(parameters) {
+    // error handler for all requests going to endpoint
     const {
       accessToken,
       result,
@@ -340,12 +372,16 @@ const handlers = {
     } = result;
 
     if ([14, 16, 17].includes(returnCode)) {
+      // invalid access token
       return this.emit('IncorrectCredentials');
     } else if ([20].includes(returnCode)) {
+      // no pin established
       return this.emit('NoPinEstablished');
     } else if ([21].includes(returnCode)) {
+      // no pin provided. This error should be caught before the request is made but just in case
       return this.emit('NoPinProvided');
     } else if ([22].includes(returnCode)) {
+      // incorrect pin. Increases pinAttempts by one
       let pinAttempts = this.attributes.pinAttempts;
       pinAttempts = pinAttempts ? pinAttempts + 1 : 1;
       this.attributes.pinAttempts = pinAttempts;
@@ -355,13 +391,16 @@ const handlers = {
         return this.emit('SecondIncorrectPin');
       }
 
+      // resets pin if third consecutive incorrect attempt
       return resetPin(accessToken)
         .then((output) => {
           log('pinReset', output);
           if (!output || !output.success) {
+            // MyQ service down
             return this.emit('MyQServiceDown');
           }
 
+          // resets pinAttempts to 0
           this.attributes.pinAttempts = 0;
           return this.emit('PinReset');
         })
@@ -369,33 +408,41 @@ const handlers = {
           log('pinReset - Error', err);
         });
     } else if ([23].includes(returnCode)) {
+      // pin has been reset
       return this.emit('PinReset');
     }
 
+    // default error
     return this.emit('MyQServiceDown');
   },
   DoorOpenIntent() {
+    // user asks to open door
     log('DoorOpenIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
+      // no doors found
       return this.emit('NoDiscoveredDevices', 'doors');
     }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     let pin = parameters.pin.value;
     if (!pin || pin === '?') {
+      // no pin provided
       return this.emit('NoPinProvided');
     }
     pin = parseFloat(pin);
     const door = getClosestDevice(doorName, doors);
     if (!door) {
+      // no door found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -403,6 +450,7 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -411,6 +459,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -427,22 +476,27 @@ const handlers = {
       });
   },
   DoorCloseIntent() {
+    // user asks to close door
     log('DoorCloseIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
+      // no doors found
       return this.emit('NoDiscoveredDevices', 'doors');
     }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     const door = getClosestDevice(doorName, doors);
     if (!door) {
+      // no door found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -450,6 +504,7 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -458,6 +513,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -474,22 +530,27 @@ const handlers = {
       });
   },
   LightOnIntent() {
+    // user asks to turn on light
     log('LightOnIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const lights = getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
+      // no lights found
       return this.emit('NoDiscoveredDevices', 'lights');
     }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
+      // no light found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -497,6 +558,7 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -505,6 +567,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -521,22 +584,27 @@ const handlers = {
       });
   },
   LightOffIntent() {
+    // user asks to turn off light
     log('LightOffIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const lights = getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
+      // no lights found
       return this.emit('NoDiscoveredDevices', 'lights');
     }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
+      // no light found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -544,6 +612,7 @@ const handlers = {
       .then((result) => {
         log('setStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -552,6 +621,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -568,22 +638,27 @@ const handlers = {
       });
   },
   DoorQueryIntent() {
+    // user asks about the state of a door
     log('DoorQueryIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
+      // no doors found
       return this.emit('NoDiscoveredDevices', 'doors');
     }
     const parameters = this.event.request.intent.slots;
     const doorName = parameters.doorName.value;
     if (!doorName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     const door = getClosestDevice(doorName, doors);
     if (!door) {
+      // no door found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -591,6 +666,7 @@ const handlers = {
       .then((result) => {
         log('getStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -599,6 +675,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -615,22 +692,27 @@ const handlers = {
       });
   },
   LightQueryIntent() {
+    // user asks about the state of a light
     log('LightQueryIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
     const lights = getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
+      // no lights found
       return this.emit('NoDiscoveredDevices', 'lights');
     }
     const parameters = this.event.request.intent.slots;
     const lightName = parameters.lightName.value;
     if (!lightName) {
+      // no name provided
       return this.emit('NoDeviceNameProvided');
     }
     const light = getClosestDevice(lightName, lights);
     if (!light) {
+      // no light found with that name
       return this.emit('IncorrectDeviceName');
     }
 
@@ -638,6 +720,7 @@ const handlers = {
       .then((result) => {
         log('getStateResult', result);
         if (!result) {
+          // MyQ service down
           return this.emit('MyQServiceDown');
         }
 
@@ -646,6 +729,7 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
@@ -662,9 +746,11 @@ const handlers = {
       });
   },
   ListDevicesIntent() {
+    // user asks for all devices found
     log('ListDevicesIntent', this.event);
     const devices = this.attributes.devices;
     if (!devices || devices.length === 0) {
+      // no devices found
       return this.emit('NoDiscoveredDevices', 'devices');
     }
 
@@ -676,9 +762,11 @@ const handlers = {
     });
   },
   ListDoorsIntent() {
+    // user asks for all doors found
     log('ListDoorsIntent', this.event);
     const doors = getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
+      // no doors found
       return this.emit('NoDiscoveredDevices', 'doors');
     }
 
@@ -690,9 +778,11 @@ const handlers = {
     });
   },
   ListLightsIntent() {
+    // user asks for all lights found
     log('ListLightsIntent', this.event);
     const lights = getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
+      // no lights found
       return this.emit('NoDiscoveredDevices', 'lights');
     }
 
@@ -704,9 +794,11 @@ const handlers = {
     });
   },
   DiscoverDevicesIntent() {
+    // user asks to discover devices
     log('DiscoverDevicesIntent', this.event);
     const accessToken = this.event.session.user.accessToken;
     if (!accessToken) {
+      // access token needed for this operation
       return this.emit('NotLinked');
     }
 
@@ -714,7 +806,8 @@ const handlers = {
       .then((result) => {
         log('discoverDevicesResult', result);
         if (!result) {
-          this.attributes.devices = [];
+          // MyQ service down
+          this.attributes.devices = []; // clear out stored list of devices
           return this.emit('MyQServiceDown');
         }
 
@@ -724,23 +817,25 @@ const handlers = {
         } = result;
 
         if (returnCode !== 0) {
+          // catch error
           return this.emit('ErrorHandler', {
             accessToken,
             result,
           });
         }
 
+        // parse list of devices
         let index = 1;
         for (let i = devices.length - 1; i >= 0; i -= 1) {
           const device = devices[i];
           if (!device.id) {
-            devices.splice(i, 1);
+            devices.splice(i, 1); // remove device if no ID
           } else if (!device.name) {
-            device.name = `Device ${index}`;
+            device.name = `Device ${index}`; // default name if not found in endpoint response
             index += 1;
           }
         }
-        this.attributes.devices = devices;
+        this.attributes.devices = devices; // store list of devices
         return this.emit('emit', {
           type: 'tellWithCard',
           speechOutput: `Discovery is complete. ${listDevices(devices)}`,
@@ -753,6 +848,7 @@ const handlers = {
       });
   },
   'AMAZON.HelpIntent': function helpIntent() {
+    // user asks for help
     log('AMAZON.HelpIntent', this.event);
     const speech = 'You can ask me to discover your devices, after which you can ask about or change the state of a device.';
     return this.emit('emit', {
@@ -761,14 +857,17 @@ const handlers = {
     });
   },
   'AMAZON.StopIntent': function stopIntent() {
+    // user stops session
     log('AMAZON.StopIntent', this.event);
     return this.emit('SessionEndedRequest');
   },
   'AMAZON.CancelIntent': function cancelIntent() {
+    // user cancels during session
     log('AMAZON.CancelIntent', this.event);
     return this.emit('SessionEndedRequest');
   },
   SessionEndedRequest() {
+    // user exits session
     log('SessionEndedRequest', this.event);
     this.emit(':saveState', true);
     return this.emit('emit', {
@@ -777,6 +876,7 @@ const handlers = {
     });
   },
   Unhandled() {
+    // in case a request does not fit any of the above
     log('Unhandled', this.event);
     this.emit('emit', {
       type: 'ask',
@@ -787,6 +887,7 @@ const handlers = {
 };
 
 exports.handler = (event, context, callback) => {
+  // initializes application
   const alexa = Alexa.handler(event, context, callback);
   alexa.appId = config.appId;
   alexa.dynamoDBTableName = config.db.name;
