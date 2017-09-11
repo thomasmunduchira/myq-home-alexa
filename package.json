@@ -1,9 +1,11 @@
 {
-  "name": "myq-alexa",
+  "name": "myq-home-alexa",
   "version": "1.0.0",
-  "description": "An Alexa custom skill to control your MyQ devices",
+  "description": "An Alexa custom skill to control your MyQ-Enabled devices",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint ./",
+    "fix": "eslint --fix ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,14 +19,17 @@
   },
   "homepage": "https://github.com/thomasmunduchira/myq-home-alexa#readme",
   "dependencies": {
-    "alexa-sdk": "^1.0.11",
-    "fast-levenshtein": "^2.0.6",
-    "request": "^2.81.0",
-    "request-promise-native": "^1.0.4"
+    "alexa-sdk": "1.0.11",
+    "fast-levenshtein": "2.0.6",
+    "request": "2.81.0",
+    "request-promise-native": "1.0.4"
   },
   "devDependencies": {
-    "eslint": "^4.5.0",
-    "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-plugin-import": "^2.7.0"
+    "eslint": "4.5.0",
+    "eslint-config-airbnb-base": "11.3.1",
+    "eslint-config-prettier": "2.4.0",
+    "eslint-plugin-import": "2.7.0",
+    "eslint-plugin-prettier": "2.2.0",
+    "prettier": "1.6.1"
   }
 }
