@@ -4,20 +4,21 @@ const help = {
   LaunchRequest() {
     // user enters skill
     utils.log('LaunchRequest', this.event);
-    const devices = this.attributes.devices;
-    const hasDevices = devices && devices.length > 0;
-    let speech = 'Welcome to MyQ Home. ';
-    if (hasDevices) {
-      speech += 'Ask about or change the state of a device.';
-    } else {
-      speech +=
-        'Ask me to discover your devices, after which you can ask about or change the state of a device.';
-    }
-    return this.emit('emit', {
-      type: 'ask',
-      speechOutput: speech,
-      repromptSpeech: speech,
-    });
+    return this.emit('notice');
+    // const devices = this.attributes.devices;
+    // const hasDevices = devices && devices.length > 0;
+    // let speech = 'Welcome to MyQ Home. ';
+    // if (hasDevices) {
+    //   speech += 'Ask about or change the state of a device.';
+    // } else {
+    //   speech +=
+    //     'Ask me to discover your devices, after which you can ask about or change the state of a device.';
+    // }
+    // return this.emit('emit', {
+    //   type: 'ask',
+    //   speechOutput: speech,
+    //   repromptSpeech: speech,
+    // });
   },
   'AMAZON.HelpIntent': function helpIntent() {
     // user asks for help

@@ -4,11 +4,12 @@ const errors = {
   NotLinked() {
     // user has not linked their MyQ account
     utils.log('NotLinked', this.event);
-    return this.emit('emit', {
-      type: 'tellWithLinkAccountCard',
-      speechOutput:
-        'Your MyQ account is not linked. Please go to your Alexa app and link your account',
-    });
+    return this.emit('notice');
+    // return this.emit('emit', {
+    //   type: 'tellWithLinkAccountCard',
+    //   speechOutput:
+    //     'Your MyQ account is not linked. Please go to your Alexa app and link your account',
+    // });
   },
   IncorrectCredentials() {
     // user has changed MyQ credentials
@@ -56,11 +57,12 @@ const errors = {
   PinReset() {
     // user provided the third consecutive incorrect pin
     utils.log('PinReset', this.event);
-    return this.emit('emit', {
-      type: 'tell',
-      speechOutput:
-        'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account',
-    });
+    return this.emit('notice');
+    // return this.emit('emit', {
+    //   type: 'tell',
+    //   speechOutput:
+    //     'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account',
+    // });
   },
   NoDiscoveredDevices(type) {
     // user does not have any devices of this type

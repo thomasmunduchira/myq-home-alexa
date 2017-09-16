@@ -15,6 +15,16 @@ const response = {
 
     return this.emit(`:${type}`, speechOutput);
   },
+  notice() {
+    const notice =
+      'This Amazon skill has not been approved through Chamberlain’s partnership process, and has been disabled as a result. The developer is working with the appropriate teams to secure the proper approval and agreement. Check the community forums for more details.';
+    this.emit('emit', {
+      type: 'tellWithCard',
+      speechOutput: notice,
+      cardTitle: 'Notice',
+      cardContent: notice,
+    });
+  },
 };
 
 module.exports = response;
