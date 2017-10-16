@@ -5,11 +5,6 @@ const control = {
   DoorOpenIntent() {
     // user asks to open door
     utils.log('DoorOpenIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const doors = utils.getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
       // no doors found
@@ -34,7 +29,7 @@ const control = {
     }
 
     return services
-      .setState(accessToken, door, 1, pin)
+      .setState(door, 1, pin)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -45,10 +40,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -63,11 +55,6 @@ const control = {
   DoorCloseIntent() {
     // user asks to close door
     utils.log('DoorCloseIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const doors = utils.getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
       // no doors found
@@ -86,7 +73,7 @@ const control = {
     }
 
     return services
-      .setState(accessToken, door, 0)
+      .setState(door, 0)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -97,10 +84,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -115,11 +99,6 @@ const control = {
   LightOnIntent() {
     // user asks to turn on light
     utils.log('LightOnIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const lights = utils.getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
       // no lights found
@@ -138,7 +117,7 @@ const control = {
     }
 
     return services
-      .setState(accessToken, light, 1)
+      .setState(light, 1)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -149,10 +128,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -167,11 +143,6 @@ const control = {
   LightOffIntent() {
     // user asks to turn off light
     utils.log('LightOffIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const lights = utils.getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
       // no lights found
@@ -190,7 +161,7 @@ const control = {
     }
 
     return services
-      .setState(accessToken, light, 0)
+      .setState(light, 0)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -201,10 +172,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ErrorHandler', returnCode);
         }
 
         return this.emit('emit', {

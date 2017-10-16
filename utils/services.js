@@ -1,21 +1,21 @@
-const request = require('request-promise-native');
+const MyQ = require('myq-api');
 
 const constants = require('../config/constants');
 const utils = require('./utils');
 
+const { email, password, pin } = process.env;
+const account = new MyQ(email, password);
+
 const services = {
-  discover(accessToken) {
+  discover() {
     // discovers all garages and lights on a user's account
-    const requestOptions = {
-      method: 'GET',
-      uri: `${constants.endpoint}/devices`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    if (this.attributes.disabled) {
+      return { returnCode: 23 };
+    }
+
+    return account
+      .login()
+      .then(() => account.getDevices(constants.typeIds))
       .then(result => {
         utils.log('discoverDevices result', result);
         return result;
@@ -25,30 +25,23 @@ const services = {
         return null;
       });
   },
-  getState(accessToken, device) {
+  getState(device) {
     // gets the state of a device
-
-    // find type of device
-    let type;
-    if (device.typeId === 3) {
-      type = 'light';
-    } else {
-      type = 'door';
+    if (this.attributes.disabled) {
+      return { returnCode: 23 };
     }
 
-    const requestOptions = {
-      method: 'GET',
-      uri: `${constants.endpoint}/${type}/state`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      qs: {
-        id: device.id,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    // switch call based on type of device
+    let call;
+    if (device.typeId === 3) {
+      call = account.getLightState;
+    } else {
+      call = account.getDoorState;
+    }
+
+    return account
+      .login()
+      .then(() => call(device.id))
       .then(result => {
         utils.log('getState result', result);
         return result;
@@ -58,32 +51,27 @@ const services = {
         return null;
       });
   },
-  setState(accessToken, device, state, pin) {
+  setState(device, state, inputPin) {
     // sets the state of a device
-
-    // find type of device
-    let type;
-    if (device.typeId === 3) {
-      type = 'light';
-    } else {
-      type = 'door';
+    if (this.attributes.disabled) {
+      return { returnCode: 23 };
+    } else if (!pin) {
+      return { returnCode: 20 };
+    } else if (inputPin !== pin) {
+      return { returnCode: 22 };
     }
 
-    const requestOptions = {
-      method: 'PUT',
-      uri: `${constants.endpoint}/${type}/state`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: {
-        id: device.id,
-        state,
-        pin,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    // switch call based on type of device
+    let call;
+    if (device.typeId === 3) {
+      call = account.setLightState;
+    } else {
+      call = account.setDoorState;
+    }
+
+    return account
+      .login()
+      .then(() => call(device.id))
       .then(result => {
         utils.log('setState result', result);
         return result;
@@ -93,26 +81,9 @@ const services = {
         return null;
       });
   },
-  resetPin(accessToken) {
+  resetPin() {
     // resets a user's pin
-    const requestOptions = {
-      method: 'POST',
-      uri: `${constants.endpoint}/resetPin`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
-      .then(result => {
-        utils.log('resetPin result', result);
-        return result;
-      })
-      .catch(err => {
-        utils.log('resetPin - Error', err);
-        return null;
-      });
+    this.attributes.disabled = true;
   },
 };
 
