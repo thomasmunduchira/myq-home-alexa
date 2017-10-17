@@ -19,7 +19,7 @@ exports.handler = (event, context, callback) => {
   // initializes application
   const alexa = Alexa.handler(event, context, callback);
   alexa.appId = appId; // optional
-  alexa.dynamoDBTableName = dbName;
+  alexa.dynamoDBTableName = dbName || 'myqHome';
   alexa.registerHandlers(handlers);
   alexa.execute();
 };
