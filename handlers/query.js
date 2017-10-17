@@ -34,7 +34,7 @@ const query = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -78,7 +78,7 @@ const query = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {

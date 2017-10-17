@@ -20,7 +20,7 @@ const discover = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         // parse list of devices

@@ -1,10 +1,18 @@
 const services = require('../utils/services');
 const utils = require('../utils/utils');
 
+let { pin } = process.env;
+pin = parseFloat(pin);
+
 const control = {
   DoorOpenIntent() {
     // user asks to open door
     utils.log('DoorOpenIntent', this.event);
+    if (this.attributes.pinDisabled) {
+      return this.emit('PinErrorHandler', 23);
+    } else if (!pin) {
+      return this.emit('PinErrorHandler', 20);
+    }
     const doors = utils.getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
       // no doors found
@@ -16,12 +24,16 @@ const control = {
       // no name provided
       return this.emit('NoDeviceNameProvided');
     }
-    let pin = parameters.pin.value;
-    if (!pin || pin === '?') {
+    let inputPin = parameters.pin.value;
+    if (!inputPin || inputPin === '?') {
       // no pin provided
-      return this.emit('NoPinProvided');
+      return this.emit('PinErrorHandler', 21);
     }
-    pin = parseFloat(pin);
+    inputPin = parseFloat(inputPin);
+    if (inputPin !== pin) {
+      // incorrect pin
+      return this.emit('PinErrorHandler', 22);
+    }
     const door = utils.getClosestDevice(doorName, doors);
     if (!door) {
       // no door found with that name
@@ -40,7 +52,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -84,7 +96,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -128,7 +140,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -172,7 +184,7 @@ const control = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', returnCode);
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
