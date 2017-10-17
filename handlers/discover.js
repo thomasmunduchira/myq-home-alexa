@@ -6,14 +6,9 @@ const discover = {
   DiscoverDevicesIntent() {
     // user asks to discover devices
     utils.log('DiscoverDevicesIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
 
     return services
-      .discover(accessToken)
+      .discover()
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -25,10 +20,7 @@ const discover = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         // parse list of devices

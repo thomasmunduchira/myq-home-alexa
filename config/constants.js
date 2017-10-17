@@ -1,7 +1,5 @@
 const constants = {
-  // endpoint
-  requestTimeout: 2250,
-  endpoint: 'https://myq.thomasmunduchira.com',
+  typeIds: [2, 3, 5, 7, 17],
 };
 
 module.exports = constants;
