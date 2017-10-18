@@ -113,8 +113,7 @@ Do you allow users to create an account or link to an existing account with you?
 When done, click **Next** down at the bottom.
 
 ### Step 19
-Click the 
-toggle to enable testing on your account if not already enabled.
+Click the toggle to enable testing on your account if not already enabled.
 
 At this point, the skill should pop up in your Alexa app and be ready to use.
 
