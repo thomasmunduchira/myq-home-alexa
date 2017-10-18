@@ -1,21 +1,17 @@
-const request = require('request-promise-native');
+const MyQ = require('myq-api');
 
 const constants = require('../config/constants');
 const utils = require('./utils');
 
+const { email, password } = process.env;
+const account = new MyQ(email, password);
+
 const services = {
-  discover(accessToken) {
+  discover() {
     // discovers all garages and lights on a user's account
-    const requestOptions = {
-      method: 'GET',
-      uri: `${constants.endpoint}/devices`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    return account
+      .login()
+      .then(() => account.getDevices(constants.typeIds))
       .then(result => {
         utils.log('discoverDevices result', result);
         return result;
@@ -25,30 +21,20 @@ const services = {
         return null;
       });
   },
-  getState(accessToken, device) {
+  getState(device) {
     // gets the state of a device
 
-    // find type of device
-    let type;
+    // switch call based on type of device
+    let call;
     if (device.typeId === 3) {
-      type = 'light';
+      call = 'getLightState';
     } else {
-      type = 'door';
+      call = 'getDoorState';
     }
 
-    const requestOptions = {
-      method: 'GET',
-      uri: `${constants.endpoint}/${type}/state`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      qs: {
-        id: device.id,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    return account
+      .login()
+      .then(() => account[call](device.id))
       .then(result => {
         utils.log('getState result', result);
         return result;
@@ -58,59 +44,26 @@ const services = {
         return null;
       });
   },
-  setState(accessToken, device, state, pin) {
+  setState(device, state) {
     // sets the state of a device
 
-    // find type of device
-    let type;
+    // switch call based on type of device
+    let call;
     if (device.typeId === 3) {
-      type = 'light';
+      call = 'setLightState';
     } else {
-      type = 'door';
+      call = 'setDoorState';
     }
 
-    const requestOptions = {
-      method: 'PUT',
-      uri: `${constants.endpoint}/${type}/state`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: {
-        id: device.id,
-        state,
-        pin,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
+    return account
+      .login()
+      .then(() => account[call](device.id, state))
       .then(result => {
         utils.log('setState result', result);
         return result;
       })
       .catch(err => {
         utils.log('setState - Error', err);
-        return null;
-      });
-  },
-  resetPin(accessToken) {
-    // resets a user's pin
-    const requestOptions = {
-      method: 'POST',
-      uri: `${constants.endpoint}/resetPin`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      json: true,
-      timeout: constants.requestTimeout,
-    };
-    return request(requestOptions)
-      .then(result => {
-        utils.log('resetPin result', result);
-        return result;
-      })
-      .catch(err => {
-        utils.log('resetPin - Error', err);
         return null;
       });
   },

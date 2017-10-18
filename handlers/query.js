@@ -5,11 +5,6 @@ const query = {
   DoorQueryIntent() {
     // user asks about the state of a door
     utils.log('DoorQueryIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const doors = utils.getDoors(this.attributes.devices);
     if (!doors || doors.length === 0) {
       // no doors found
@@ -28,7 +23,7 @@ const query = {
     }
 
     return services
-      .getState(accessToken, door)
+      .getState(door)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -39,10 +34,7 @@ const query = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {
@@ -57,11 +49,6 @@ const query = {
   LightQueryIntent() {
     // user asks about the state of a light
     utils.log('LightQueryIntent', this.event);
-    const accessToken = this.event.session.user.accessToken;
-    if (!accessToken) {
-      // access token needed for this operation
-      return this.emit('NotLinked');
-    }
     const lights = utils.getLights(this.attributes.devices);
     if (!lights || lights.length === 0) {
       // no lights found
@@ -80,7 +67,7 @@ const query = {
     }
 
     return services
-      .getState(accessToken, light)
+      .getState(light)
       .then(result => {
         if (!result) {
           // MyQ service down
@@ -91,10 +78,7 @@ const query = {
 
         if (returnCode !== 0) {
           // catch error
-          return this.emit('ErrorHandler', {
-            accessToken,
-            result,
-          });
+          return this.emit('ServiceErrorHandler', returnCode);
         }
 
         return this.emit('emit', {

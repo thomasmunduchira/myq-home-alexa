@@ -1,31 +1,22 @@
 const utils = require('../utils/utils');
 
 const errors = {
-  NotLinked() {
-    // user has not linked their MyQ account
-    utils.log('NotLinked', this.event);
-    return this.emit('emit', {
-      type: 'tellWithLinkAccountCard',
-      speechOutput:
-        'Your MyQ account is not linked. Please go to your Alexa app and link your account',
-    });
-  },
   IncorrectCredentials() {
     // user has changed MyQ credentials
     utils.log('IncorrectCredentials', this.event);
     return this.emit('emit', {
-      type: 'tellWithLinkAccountCard',
+      type: 'tell',
       speechOutput:
-        'Your MyQ account credentials have changed. Please go to your Alexa app and link your account again',
+        'Your MyQ account credentials have changed. Please go to your Lambda service and correct your credentials',
     });
   },
   NoPinEstablished() {
     // user does not have a pin established
     utils.log('NoPinEstablished', this.event);
     return this.emit('emit', {
-      type: 'tellWithLinkAccountCard',
+      type: 'tell',
       speechOutput:
-        'You do not have a pin established. Please go to your Alexa app and relink your MyQ account with a pin',
+        'You do not have a pin established. Please go to your Lambda service to set a pin',
     });
   },
   NoPinProvided() {
@@ -50,7 +41,7 @@ const errors = {
     return this.emit('emit', {
       type: 'ask',
       speechOutput:
-        'You have provided an incorrect pin. If you forgot your pin, please go to your Alexa app and relink your MyQ account',
+        'You have provided an incorrect pin. If you forgot your pin, please set a new pin through your Lambda service and then disable and reenable this skill through the Alexa app to have the changes take effect',
     });
   },
   PinReset() {
@@ -59,7 +50,7 @@ const errors = {
     return this.emit('emit', {
       type: 'tell',
       speechOutput:
-        'Your pin has been reset due to too many incorrect attempts. Please go to your Alexa app and relink your MyQ account',
+        'Your pin has been disabled due to too many incorrect attempts. Please set a new pin through your Lambda service and then disable and reenable this skill through the Alexa app to have the changes take effect',
     });
   },
   NoDiscoveredDevices(type) {
@@ -94,19 +85,13 @@ const errors = {
       speechOutput: 'The MyQ service is currently down. Please wait for a bit and try again.',
     });
   },
-  ErrorHandler(parameters) {
-    // error handler for all requests going to endpoint
-    const { accessToken, result } = parameters;
-    const { returnCode } = result;
-
-    if ([14, 16, 17].includes(returnCode)) {
-      // invalid access token
-      return this.emit('IncorrectCredentials');
-    } else if ([20].includes(returnCode)) {
+  PinErrorHandler(returnCode) {
+    // error handler for pin validation
+    if ([20].includes(returnCode)) {
       // no pin established
       return this.emit('NoPinEstablished');
     } else if ([21].includes(returnCode)) {
-      // no pin provided. This error should be caught before the request is made but just in case
+      // no pin provided
       return this.emit('NoPinProvided');
     } else if ([22].includes(returnCode)) {
       // incorrect pin. Increases pinAttempts by one
@@ -119,25 +104,21 @@ const errors = {
         return this.emit('SecondIncorrectPin');
       }
 
-      // resets pin if third consecutive incorrect attempt
-      return this.resetPin(accessToken)
-        .then(output => {
-          utils.log('pinReset', output);
-          if (!output || !output.success) {
-            // MyQ service down
-            return this.emit('MyQServiceDown');
-          }
-
-          // resets pinAttempts to 0
-          this.attributes.pinAttempts = 0;
-          return this.emit('PinReset');
-        })
-        .catch(err => {
-          utils.log('pinReset - Error', err);
-        });
-    } else if ([23].includes(returnCode)) {
-      // pin has been reset
+      this.attributes.pinDisabled = true; // resets pin if third consecutive incorrect attempt
+      this.attributes.pinAttempts = 0; // resets pinAttempts to 0
       return this.emit('PinReset');
+    } else if ([23].includes(returnCode)) {
+      return this.emit('PinReset');
+    }
+
+    // default error
+    return this.emit('MyQServiceDown');
+  },
+  ServiceErrorHandler(returnCode) {
+    // error handler for all requests going to endpoint
+    if ([13, 14, 16, 17].includes(returnCode)) {
+      // invalid access token
+      return this.emit('IncorrectCredentials');
     }
 
     // default error

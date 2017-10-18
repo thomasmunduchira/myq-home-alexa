@@ -2,7 +2,7 @@ const Alexa = require('alexa-sdk');
 const fs = require('fs');
 const path = require('path');
 
-const config = require('./config/config');
+const { appId, dbName } = process.env;
 
 // loads all modules in handlers folder
 const allHandlers = [];
@@ -18,8 +18,8 @@ const handlers = Object.assign({}, ...allHandlers);
 exports.handler = (event, context, callback) => {
   // initializes application
   const alexa = Alexa.handler(event, context, callback);
-  alexa.appId = config.appId;
-  alexa.dynamoDBTableName = config.db.name;
+  alexa.appId = appId; // optional
+  alexa.dynamoDBTableName = dbName || 'myqHome';
   alexa.registerHandlers(handlers);
   alexa.execute();
 };
