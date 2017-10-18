@@ -7,7 +7,7 @@ An Alexa custom skill to control your MyQ-Enabled devices.
 Create a free Amazon Developer account [here](https://developer.amazon.com/) or login to it if you already have one.
 
 ### Step 2
-Click the **Alexa** tab on top, then the **Get Started** button on the Alexa Skills Kit card, and then the **Add a New Skill** button on the top right.
+Click the **Alexa** tab on top, then the **Get Started** button on the Alexa Skills Kit card, and then **Add a New Skill** on the top right.
 
 ### Step 3
 Make sure the **Create a New Alexa Skill** page has the following settings. Any settings not mentioned should be left as is.
@@ -25,33 +25,46 @@ When done, click **Save** down at the bottom.
 Click on **Interaction Model** on the left and then click **Launch Skill Builder**. After the Skill Builder dashboard pops up, click on **Code Editor** on the top left.
 
 ### Step 5
-Copy everything on [this page](https://raw.githubusercontent.com/thomasmunduchira/myq-home-alexa/master/speechAssets/IntentSchema.json) and replace the existing content in the Code Editor with this new content.
+Copy everything on [this page](https://raw.githubusercontent.com/thomasmunduchira/myq-home-alexa/master/assets/IntentSchema.json) and replace the existing content in the Code Editor with this new content.
+
+When done, click **Build Model**. Then click **Configuration** up on top.
 
 ### Step 6
-Click **Build Model**. Then click **Configuration** up on top.
-
-### Step 7
 In a new tab, create a free Amazon AWS account [here](https://aws.amazon.com/) or login to it if you already have one.
 
-### Step 8
+### Step 7
 Ensure that the location on the top right is **N. Virginia**. If not, switch to that location.
 
-### Step 9
+### Step 8
 Click on **Lambda** under **Compute**. Then click on **Create function**, and then click **Author from scratch**.
 
-### Step 10
-Make sure the **Basic Information** page has the following settings. Some of the settings might not appear initially, but will dynamically appear as you change the settings one by one.
+### Step 9
+Make sure the **Basic Information** page has the following settings. A new page should pop up for configuring the new custom role.
 
 ```
 Name: myqHome
-Role: Create new role from template(s)
-Role name: myqHomeRole
-Policy templates: Simple Microservice permissions
+Role: Create a custom role
 ```
 
-When done, click on **Create function** on the bottom right.
+### Step 10
+Make sure the **Role Summary** section on the new page has the following settings. Some of the settings might not appear initially, but will dynamically appear as you change the settings one by one.
+
+```
+IAM Role: Create a new IAM Role
+Role Name: myqHomeRole
+```
+
+When done, click **View Policy Document**. A text box should appear near the bottom. Click **Edit** and then click **Ok** on the confirmation popup.
 
 ### Step 11
+Copy everything on [this page](https://raw.githubusercontent.com/thomasmunduchira/myq-home-alexa/master/assets/iamPolicy.json) and replace the existing content in the text box with this new content.
+
+When done, click **Allow** down at the bottom right.
+
+### Step 12
+On the Lambda function creation page, click **Create function** on the bottom right.
+
+### Step 13
 Make sure the **Function code** section has the following settings.
 
 ```
@@ -60,20 +73,20 @@ Runtime: Node.js 6.10
 Handler: index.handler
 ```
 
-### Step 12
-Click [here](https://drive.google.com/file/d/0Bx2mdlDO74LnR1FaZV8zMDQ2Z2M/view?usp=sharing) to download the ZIP file containing all the code.
+### Step 14
+Click [here](https://drive.google.com/file/d/0Bx2mdlDO74LnR1FaZV8zMDQ2Z2M/view?usp=sharing) to access the ZIP file containing all the code. Download it to your local computer.
 
-### Step 13
+### Step 15
 Click **Upload** under **Function Package** and then upload the ZIP file you downloaded in the previous step.
 
-### Step 14
+### Step 16
 Click **Environment variables** and add the following keys and values:
 
 ```
 Key      | Value
 
-email    | <the email for the Amazon account your Alexa is registered to (required)>
-password | <the password for your Amazon account (required)>
+email    | <The email for the Amazon account your Alexa is registered to (required)>
+password | <The password for your Amazon account (required)>
 appId    | <Copy and paste the ID for your Alexa skill here (optional, no functionality blocked if not set). Sample: amzn1.ask.skill.fcs77245-01f4-4981-cze9-a755g4382115>
 pin      | <4 to 12 digit number (optional, will not be able to open doors if not set)>
 dbName   | <The database name (optional, will default to myqHome if not set)>
@@ -81,10 +94,10 @@ dbName   | <The database name (optional, will default to myqHome if not set)>
 
 When done, click **Save** up on top.
 
-### Step 15
+### Step 17
 Click on **Triggers** under the Lambda function name and then click **Add Trigger**. Click the box and then select **Alexa Skills Kit**. Click **Submit** afterwards.
 
-### Step 16
+### Step 18
 Switch back to your Alexa skill. Make sure the **Configuration** section has the following settings. Any settings not mentioned should be left as is. Some of the settings might not appear initially, but will dynamically appear as you change the settings one by one.
 
 ```
@@ -99,7 +112,7 @@ Do you allow users to create an account or link to an existing account with you?
 
 When done, click **Next** down at the bottom.
 
-### Step 17
+### Step 19
 Click the toggle to enable testing on your account if not already enabled.
 
 At this point, the skill should pop up in your Alexa app and be ready to use.
