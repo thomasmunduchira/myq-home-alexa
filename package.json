@@ -21,7 +21,7 @@
   "dependencies": {
     "alexa-sdk": "1.0.11",
     "fast-levenshtein": "2.0.6",
-    "myq-api": "0.0.1"
+    "myq-api": "0.0.2"
   },
   "devDependencies": {
     "eslint": "4.5.0",
