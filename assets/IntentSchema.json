@@ -1,460 +1,451 @@
 {
-  "intents": [{
-      "name": "AMAZON.CancelIntent",
-      "samples": []
-    },
-    {
-      "name": "AMAZON.HelpIntent",
-      "samples": []
-    },
-    {
-      "name": "AMAZON.StopIntent",
-      "samples": []
-    },
-    {
-      "name": "DiscoverDevicesIntent",
-      "samples": [
-        "{discover} for all my {devices}",
-        "{discover} all my {devices}",
-        "{discover} for {devices}",
-        "{discover} my {devices}",
-        "{discover} {devices}",
-        "{discover}"
-      ],
-      "slots": [{
-          "name": "devices",
-          "type": "devices",
-          "samples": []
-        },
-        {
-          "name": "discover",
-          "type": "discover",
-          "samples": []
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "my queue",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "DiscoverDevicesIntent",
+                    "slots": [
+                        {
+                            "name": "devices",
+                            "type": "devices"
+                        },
+                        {
+                            "name": "discover",
+                            "type": "discover"
+                        }
+                    ],
+                    "samples": [
+                        "{discover} for all my {devices}",
+                        "{discover} all my {devices}",
+                        "{discover} for {devices}",
+                        "{discover} my {devices}",
+                        "{discover} {devices}",
+                        "{discover}"
+                    ]
+                },
+                {
+                    "name": "DoorCloseIntent",
+                    "slots": [
+                        {
+                            "name": "doorName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "close",
+                            "type": "close"
+                        }
+                    ],
+                    "samples": [
+                        "{close} my {doorName}",
+                        "{close} {doorName}"
+                    ]
+                },
+                {
+                    "name": "DoorOpenIntent",
+                    "slots": [
+                        {
+                            "name": "doorName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "pin",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "open",
+                            "type": "open"
+                        },
+                        {
+                            "name": "pinToggle",
+                            "type": "pinToggle"
+                        }
+                    ],
+                    "samples": [
+                        "{open} my {doorName} {pinToggle} {pin}",
+                        "{open} my {doorName} with {pinToggle} {pin}",
+                        "{open} {doorName} {pinToggle} {pin}",
+                        "{open} {doorName} with {pinToggle} {pin}",
+                        "{open} my {doorName}",
+                        "{open} {doorName}"
+                    ]
+                },
+                {
+                    "name": "DoorQueryIntent",
+                    "slots": [
+                        {
+                            "name": "doorName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "open",
+                            "type": "open"
+                        },
+                        {
+                            "name": "closed",
+                            "type": "close"
+                        },
+                        {
+                            "name": "query",
+                            "type": "query"
+                        }
+                    ],
+                    "samples": [
+                        "{query} my {doorName} {open}",
+                        "{query} {doorName} {open}",
+                        "{query} my {doorName} {closed}",
+                        "{query} {doorName} {closed}",
+                        "{query} {doorName}",
+                        "{query} my {doorName}"
+                    ]
+                },
+                {
+                    "name": "LightOffIntent",
+                    "slots": [
+                        {
+                            "name": "lightName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "off",
+                            "type": "off"
+                        }
+                    ],
+                    "samples": [
+                        "Turn {off} my {lightName}",
+                        "Turn {off} {lightName}",
+                        "my {lightName} {off}",
+                        "{lightName} {off}",
+                        "{off} my {lightName}",
+                        "{off} {lightName}"
+                    ]
+                },
+                {
+                    "name": "LightOnIntent",
+                    "slots": [
+                        {
+                            "name": "lightName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "on",
+                            "type": "on"
+                        }
+                    ],
+                    "samples": [
+                        "Turn {on} my {lightName}",
+                        "Turn {on} {lightName}",
+                        "my {lightName} {on}",
+                        "{lightName} {on}",
+                        "{on} my {lightName}",
+                        "{on} {lightName}"
+                    ]
+                },
+                {
+                    "name": "LightQueryIntent",
+                    "slots": [
+                        {
+                            "name": "lightName",
+                            "type": "catchAll"
+                        },
+                        {
+                            "name": "off",
+                            "type": "off"
+                        },
+                        {
+                            "name": "on",
+                            "type": "on"
+                        },
+                        {
+                            "name": "query",
+                            "type": "query"
+                        }
+                    ],
+                    "samples": [
+                        "{query} my {lightName} {on}",
+                        "{query} {lightName} {on}",
+                        "{query} my {lightName} {off}",
+                        "{query} {lightName} {off}",
+                        "{query} {lightName}",
+                        "{query} my {lightName}"
+                    ]
+                },
+                {
+                    "name": "ListDevicesIntent",
+                    "slots": [
+                        {
+                            "name": "devices",
+                            "type": "devices"
+                        },
+                        {
+                            "name": "list",
+                            "type": "list"
+                        }
+                    ],
+                    "samples": [
+                        "{list} all my {devices}",
+                        "{list} all {devices}",
+                        "{list} my {devices}",
+                        "{list} {devices}"
+                    ]
+                },
+                {
+                    "name": "ListDoorsIntent",
+                    "slots": [
+                        {
+                            "name": "doors",
+                            "type": "doors"
+                        },
+                        {
+                            "name": "list",
+                            "type": "list"
+                        }
+                    ],
+                    "samples": [
+                        "{list} all my {doors}",
+                        "{list} all {doors}",
+                        "{list} my {doors}",
+                        "{list} {doors}"
+                    ]
+                },
+                {
+                    "name": "ListLightsIntent",
+                    "slots": [
+                        {
+                            "name": "lights",
+                            "type": "lights"
+                        },
+                        {
+                            "name": "list",
+                            "type": "list"
+                        }
+                    ],
+                    "samples": [
+                        "{list} all my {lights}",
+                        "{list} all {lights}",
+                        "{list} my {lights}",
+                        "{list} {lights}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "catchAll",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "garage"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "door"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "lights"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "lamp"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "washing machine"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "close",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "close",
+                                "synonyms": [
+                                    "shut",
+                                    "locked",
+                                    "armed",
+                                    "arm",
+                                    "lock",
+                                    "closed"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "devices",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "devices",
+                                "synonyms": [
+                                    "accessories",
+                                    "gadgets",
+                                    "gadget",
+                                    "accessory",
+                                    "device"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "discover",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "discover",
+                                "synonyms": [
+                                    "fetch",
+                                    "find",
+                                    "search"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "doors",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "doors",
+                                "synonyms": [
+                                    "garage",
+                                    "garages",
+                                    "doors",
+                                    "door",
+                                    "garage doors",
+                                    "garage door"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "lights",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "lights",
+                                "synonyms": [
+                                    "lamps",
+                                    "bulbs",
+                                    "bulb",
+                                    "lamp",
+                                    "light"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "list",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "list",
+                                "synonyms": [
+                                    "what are",
+                                    "tell me",
+                                    "read me"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "off",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "off"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "on",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "on"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "open",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "open",
+                                "synonyms": [
+                                    "unarmed",
+                                    "unlocked",
+                                    "unlock",
+                                    "unarm",
+                                    "opened"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "pinToggle",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "pinToggle",
+                                "synonyms": [
+                                    "pin",
+                                    "number",
+                                    "pin number",
+                                    "code",
+                                    "security code"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "query",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "query",
+                                "synonyms": [
+                                    "is",
+                                    "are",
+                                    "state",
+                                    "what is the state of",
+                                    "what are the states of",
+                                    "status",
+                                    "what is the status of",
+                                    "what are the statuses of"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
         }
-      ]
-    },
-    {
-      "name": "DoorCloseIntent",
-      "samples": [
-        "{close} my {doorName}",
-        "{close} {doorName}"
-      ],
-      "slots": [{
-          "name": "doorName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "close",
-          "type": "close",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "DoorOpenIntent",
-      "samples": [
-        "{open} my {doorName} {pinToggle} {pin}",
-        "{open} my {doorName} with {pinToggle} {pin}",
-        "{open} {doorName} {pinToggle} {pin}",
-        "{open} {doorName} with {pinToggle} {pin}",
-        "{open} my {doorName}",
-        "{open} {doorName}"
-      ],
-      "slots": [{
-          "name": "doorName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "pin",
-          "type": "AMAZON.NUMBER",
-          "samples": []
-        },
-        {
-          "name": "open",
-          "type": "open",
-          "samples": []
-        },
-        {
-          "name": "pinToggle",
-          "type": "pinToggle",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "DoorQueryIntent",
-      "samples": [
-        "{query} my {doorName} {open}",
-        "{query} {doorName} {open}",
-        "{query} my {doorName} {closed}",
-        "{query} {doorName} {closed}",
-        "{query} {doorName}",
-        "{query} my {doorName}"
-      ],
-      "slots": [{
-          "name": "doorName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "open",
-          "type": "open",
-          "samples": []
-        },
-        {
-          "name": "closed",
-          "type": "close",
-          "samples": []
-        },
-        {
-          "name": "query",
-          "type": "query",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "LightOffIntent",
-      "samples": [
-        "Turn {off} my {lightName}",
-        "Turn {off} {lightName}",
-        "my {lightName} {off}",
-        "{lightName} {off}",
-        "{off} my {lightName}",
-        "{off} {lightName}"
-      ],
-      "slots": [{
-          "name": "lightName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "off",
-          "type": "off",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "LightOnIntent",
-      "samples": [
-        "Turn {on} my {lightName}",
-        "Turn {on} {lightName}",
-        "my {lightName} {on}",
-        "{lightName} {on}",
-        "{on} my {lightName}",
-        "{on} {lightName}"
-      ],
-      "slots": [{
-          "name": "lightName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "on",
-          "type": "on",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "LightQueryIntent",
-      "samples": [
-        "{query} my {lightName} {on}",
-        "{query} {lightName} {on}",
-        "{query} my {lightName} {off}",
-        "{query} {lightName} {off}",
-        "{query} {lightName}",
-        "{query} my {lightName}"
-      ],
-      "slots": [{
-          "name": "lightName",
-          "type": "catchAll",
-          "samples": []
-        },
-        {
-          "name": "off",
-          "type": "off",
-          "samples": []
-        },
-        {
-          "name": "on",
-          "type": "on",
-          "samples": []
-        },
-        {
-          "name": "query",
-          "type": "query",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "ListDevicesIntent",
-      "samples": [
-        "{list} all my {devices}",
-        "{list} all {devices}",
-        "{list} my {devices}",
-        "{list} {devices}"
-      ],
-      "slots": [{
-          "name": "devices",
-          "type": "devices",
-          "samples": []
-        },
-        {
-          "name": "list",
-          "type": "list",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "ListDoorsIntent",
-      "samples": [
-        "{list} all my {doors}",
-        "{list} all {doors}",
-        "{list} my {doors}",
-        "{list} {doors}"
-      ],
-      "slots": [{
-          "name": "doors",
-          "type": "doors",
-          "samples": []
-        },
-        {
-          "name": "list",
-          "type": "list",
-          "samples": []
-        }
-      ]
-    },
-    {
-      "name": "ListLightsIntent",
-      "samples": [
-        "{list} all my {lights}",
-        "{list} all {lights}",
-        "{list} my {lights}",
-        "{list} {lights}"
-      ],
-      "slots": [{
-          "name": "lights",
-          "type": "lights",
-          "samples": []
-        },
-        {
-          "name": "list",
-          "type": "list",
-          "samples": []
-        }
-      ]
     }
-  ],
-  "types": [{
-      "name": "catchAll",
-      "values": [{
-          "id": null,
-          "name": {
-            "value": "garage",
-            "synonyms": []
-          }
-        },
-        {
-          "id": null,
-          "name": {
-            "value": "door",
-            "synonyms": []
-          }
-        },
-        {
-          "id": null,
-          "name": {
-            "value": "lights",
-            "synonyms": []
-          }
-        },
-        {
-          "id": null,
-          "name": {
-            "value": "lamp",
-            "synonyms": []
-          }
-        },
-        {
-          "id": null,
-          "name": {
-            "value": "washing machine",
-            "synonyms": []
-          }
-        }
-      ]
-    },
-    {
-      "name": "close",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "close",
-          "synonyms": [
-            "shut",
-            "locked",
-            "armed",
-            "arm",
-            "lock",
-            "closed"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "devices",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "devices",
-          "synonyms": [
-            "accessories",
-            "gadgets",
-            "gadget",
-            "accessory",
-            "device"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "discover",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "discover",
-          "synonyms": [
-            "fetch",
-            "find",
-            "search"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "doors",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "doors",
-          "synonyms": [
-            "garage",
-            "garages",
-            "doors",
-            "door",
-            "garage doors",
-            "garage door"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "lights",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "lights",
-          "synonyms": [
-            "lamps",
-            "bulbs",
-            "bulb",
-            "lamp",
-            "light"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "list",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "list",
-          "synonyms": [
-            "what are",
-            "tell me",
-            "read me"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "off",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "off",
-          "synonyms": []
-        }
-      }]
-    },
-    {
-      "name": "on",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "on",
-          "synonyms": []
-        }
-      }]
-    },
-    {
-      "name": "open",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "open",
-          "synonyms": [
-            "unarmed",
-            "unlocked",
-            "unlock",
-            "unarm",
-            "opened"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "pinToggle",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "pinToggle",
-          "synonyms": [
-            "pin",
-            "number",
-            "pin number",
-            "code",
-            "security code"
-          ]
-        }
-      }]
-    },
-    {
-      "name": "query",
-      "values": [{
-        "id": null,
-        "name": {
-          "value": "query",
-          "synonyms": [
-            "is",
-            "are",
-            "state",
-            "what is the state of",
-            "what are the states of",
-            "status",
-            "what is the status of",
-            "what are the statuses of"
-          ]
-        }
-      }]
-    }
-  ]
 }
