@@ -5,7 +5,7 @@ const description = {
   ListDevicesIntent() {
     // user asks for all devices found
     utils.log('ListDevicesIntent', this.event);
-    const devices = this.attributes.devices;
+    const { devices } = this.attributes;
     if (!devices || devices.length === 0) {
       // no devices found
       return this.emit('NoDiscoveredDevices', 'devices');

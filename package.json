@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thomasmunduchira/myq-home-alexa.git"
+    "url": "https://github.com/thomasmunduchira/myq-home-alexa.git"
   },
   "author": "Thomas Munduchira",
   "license": "MIT",
@@ -19,16 +19,16 @@
   },
   "homepage": "https://github.com/thomasmunduchira/myq-home-alexa#readme",
   "dependencies": {
-    "alexa-sdk": "1.0.11",
+    "alexa-sdk": "1.0.25",
     "fast-levenshtein": "2.0.6",
     "myq-api": "0.0.2"
   },
   "devDependencies": {
-    "eslint": "4.5.0",
-    "eslint-config-airbnb-base": "11.3.1",
-    "eslint-config-prettier": "2.4.0",
-    "eslint-plugin-import": "2.7.0",
-    "eslint-plugin-prettier": "2.2.0",
-    "prettier": "1.6.1"
+    "eslint": "5.9.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-config-prettier": "3.3.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-prettier": "3.0.0",
+    "prettier": "1.15.2"
   }
 }

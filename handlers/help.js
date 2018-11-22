@@ -4,7 +4,7 @@ const help = {
   LaunchRequest() {
     // user enters skill
     utils.log('LaunchRequest', this.event);
-    const devices = this.attributes.devices;
+    const { devices } = this.attributes;
     const hasDevices = devices && devices.length > 0;
     let speech = 'Welcome to MyQ Home. ';
     if (hasDevices) {

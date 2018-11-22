@@ -6,7 +6,8 @@ const information = {
     let description = '';
     if (devices.length === 0) {
       return description;
-    } else if (devices.length === 1) {
+    }
+    if (devices.length === 1) {
       description += `Your ${singularName} is called ${devices[0].name}.`;
       return description;
     }
@@ -41,29 +42,27 @@ const information = {
     const descriptionDoors = this.describeDevices(doors, 'door', 'doors');
     const lights = utils.getLights(devices);
     const descriptionLights = this.describeDevices(lights, 'light', 'lights');
-    const description = `You have ${devices.length} ${devices.length === 1
-      ? 'device'
-      : 'devices'}, ${doors.length} ${doors.length === 1
-      ? 'door'
-      : 'doors'} and ${lights.length} ${lights.length === 1
-      ? 'light'
-      : 'lights'}. ${descriptionDoors} ${descriptionLights}`;
+    const description = `You have ${devices.length} ${
+      devices.length === 1 ? 'device' : 'devices'
+    }, ${doors.length} ${doors.length === 1 ? 'door' : 'doors'} and ${lights.length} ${
+      lights.length === 1 ? 'light' : 'lights'
+    }. ${descriptionDoors} ${descriptionLights}`;
     return description;
   },
   listDoors(doors) {
     // generates a description of doors
     const descriptionDoors = this.describeDevices(doors, 'door', 'doors');
-    const description = `You have ${doors.length} ${doors.length === 1
-      ? 'door'
-      : 'doors'}. ${descriptionDoors}`;
+    const description = `You have ${doors.length} ${
+      doors.length === 1 ? 'door' : 'doors'
+    }. ${descriptionDoors}`;
     return description;
   },
   listLights(lights) {
     // generates a description of lights
     const descriptionLights = this.describeDevices(lights, 'light', 'lights');
-    const description = `You have ${lights.length} ${lights.length === 1
-      ? 'light'
-      : 'lights'}. ${descriptionLights}`;
+    const description = `You have ${lights.length} ${
+      lights.length === 1 ? 'light' : 'lights'
+    }. ${descriptionLights}`;
     return description;
   },
 };

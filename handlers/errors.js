@@ -90,24 +90,28 @@ const errors = {
     if ([20].includes(returnCode)) {
       // no pin established
       return this.emit('NoPinEstablished');
-    } else if ([21].includes(returnCode)) {
+    }
+    if ([21].includes(returnCode)) {
       // no pin provided
       return this.emit('NoPinProvided');
-    } else if ([22].includes(returnCode)) {
+    }
+    if ([22].includes(returnCode)) {
       // incorrect pin. Increases pinAttempts by one
-      let pinAttempts = this.attributes.pinAttempts;
+      let { pinAttempts } = this.attributes;
       pinAttempts = pinAttempts ? pinAttempts + 1 : 1;
       this.attributes.pinAttempts = pinAttempts;
       if (pinAttempts === 1) {
         return this.emit('FirstIncorrectPin');
-      } else if (pinAttempts === 2) {
+      }
+      if (pinAttempts === 2) {
         return this.emit('SecondIncorrectPin');
       }
 
       this.attributes.pinDisabled = true; // resets pin if third consecutive incorrect attempt
       this.attributes.pinAttempts = 0; // resets pinAttempts to 0
       return this.emit('PinReset');
-    } else if ([23].includes(returnCode)) {
+    }
+    if ([23].includes(returnCode)) {
       return this.emit('PinReset');
     }
 

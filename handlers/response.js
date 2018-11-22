@@ -7,9 +7,11 @@ const response = {
     utils.log(`Response ${type}`, parameters);
     if (['ask'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, repromptSpeech);
-    } else if (['tellWithCard'].includes(type)) {
+    }
+    if (['tellWithCard'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, cardTitle, cardContent, imageObj);
-    } else if (['askWithCard'].includes(type)) {
+    }
+    if (['askWithCard'].includes(type)) {
       return this.emit(`:${type}`, speechOutput, repromptSpeech, cardTitle, cardContent, imageObj);
     }
 
