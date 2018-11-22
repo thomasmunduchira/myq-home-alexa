@@ -10,7 +10,8 @@ const control = {
     utils.log('DoorOpenIntent', this.event);
     if (this.attributes.pinDisabled) {
       return this.emit('PinErrorHandler', 23);
-    } else if (!pin) {
+    }
+    if (!pin) {
       return this.emit('PinErrorHandler', 20);
     }
     const doors = utils.getDoors(this.attributes.devices);
