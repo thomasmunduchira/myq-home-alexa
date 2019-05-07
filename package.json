@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "eslint ./",
     "fix": "eslint --fix ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -21,7 +23,8 @@
   "dependencies": {
     "alexa-sdk": "1.0.25",
     "fast-levenshtein": "2.0.6",
-    "myq-api": "0.0.2"
+    "myq-api": "0.0.2",
+    "snyk": "^1.161.1"
   },
   "devDependencies": {
     "eslint": "5.9.0",
@@ -30,5 +33,6 @@
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-prettier": "3.0.0",
     "prettier": "1.15.2"
-  }
+  },
+  "snyk": true
 }
